@@ -1,24 +1,51 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
 
 function App() {
+  const [formData, setFormData] = useState({
+    id: '',
+    oid: '',
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    })
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Xử lý dữ liệu khi form được gửi đi, ví dụ: gửi dữ liệu lên máy chủ
+    fetch(`http://localhost:8080/snmp/${formData.id}/${formData.oid}}`)
+      .then(response => response.json())
+      .then(data => console.log(data));
+    console.log("Dữ liệu được gửi đi:", formData);
+    
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <form onSubmit={handleSubmit}>
+      <div>
+        <input
+          type="text"
+          id="id"
+          name="id"
+          value={formData.id}
+          onChange={handleChange}
+        />
+      </div>
+      <div>
+        <input
+          type="password"
+          id="oid"
+          name="oid"
+          value={formData.oid}
+          onChange={handleChange}
+        />
+      </div>
+      <button type="submit">Get</button>
+    </form>
   );
 }
 
