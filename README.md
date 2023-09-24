@@ -12,6 +12,7 @@
       - React-router-dom, 
       - Sass, 
       - Sort-by
+      - Normalize.css
 
 **Server:** 
 
