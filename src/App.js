@@ -1,10 +1,13 @@
+import DefaultLayout from 'layouts/DefaultLayout';
+import Home from 'pages/home';
 import React from 'react';
-import { DatePicker } from 'antd';
-import httpRequest, {get} from './utils/httpRequests';
-import axios from 'axios';
+import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import routes from 'routes';
 
 const App = () => {
-  return <DatePicker />;
+  const router = createBrowserRouter(routes);
+
+  return <RouterProvider router={router} />;
 }
 
 export default App
