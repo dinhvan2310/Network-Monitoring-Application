@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { DatePicker } from 'antd';
+import httpRequest, {get} from './utils/httpRequests';
+import axios from 'axios';
 
-function App() {
-  
-
-  return (
-    
-  );
+const App = () => {
+  return <DatePicker />;
 }
 
-export default App;
+export default App
