@@ -1,0 +1,21 @@
+.card
+{
+    width: 300px;
+    height: 300px;
+    cursor: pointer;
+}
+
+.card:hover
+{
+    border: 1px solid #3e99ee;
+}
+
+.desc
+{
+    margin-bottom: 12px;
+}
+
+.subDesc
+{
+    font-size: 12px;
+}

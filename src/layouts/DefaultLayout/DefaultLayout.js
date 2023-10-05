@@ -81,7 +81,7 @@ const DefaultLayout = () => {
 
   const sidebarDevicesItems = devices.map((device) => {
     return {
-      label: <Link to={`/devices/${device.ip}/home`}>{device.name}</Link>,
+      label: <Link to={`/devices/${device.ip}/overview`}>{device.name}</Link>,
       key: `/devices/${device.ip}`,
       icon: <HddOutlined />,
     };

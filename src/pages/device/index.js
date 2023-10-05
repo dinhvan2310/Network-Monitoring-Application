@@ -13,7 +13,7 @@ const { Header, Content } = Layout;
 
 
 const Device = () => {
-  const [current, setCurrent] = useState("mail");
+  const [current, setCurrent] = useState("overview");
   const url = useLocation().pathname;
 
   const ip = url.split("/")[2];
@@ -26,62 +26,34 @@ const Device = () => {
 
   const items = [
     {
-      label: <Link to={`/devices/${ip}/home`}>Home</Link>,
-      key: "home",
+      label: <Link to={`/devices/${ip}/overview`}>Overview</Link>,
+      key: "overview",
       icon: <AppstoreOutlined />,
     },
     {
-      label: "Navigation Two",
-      key: "app",
+      label: <Link to={`/devices/${ip}/statistic/2`}>2 Days</Link>,
+      key: "2days",
       icon: <AppstoreOutlined />,
-      disabled: true,
     },
     {
-      label: "Navigation Three - Submenu",
-      key: "SubMenu",
+      label: <Link to={`/devices/${ip}/statistic/30`}>30 Days</Link>,
+      key: "30days",
       icon: <AppstoreOutlined />,
-      children: [
-        {
-          type: "group",
-          label: "Item 1",
-          children: [
-            {
-              label: "Option 1",
-              key: "setting:1",
-            },
-            {
-              label: "Option 2",
-              key: "setting:2",
-            },
-          ],
-        },
-        {
-          type: "group",
-          label: "Item 2",
-          children: [
-            {
-              label: "Option 3",
-              key: "setting:3",
-            },
-            {
-              label: "Option 4",
-              key: "setting:4",
-            },
-          ],
-        },
-      ],
     },
     {
-      label: (
-        <a
-          href="https://www.facebook.com/"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Navigation Four - Link
-        </a>
-      ),
-      key: "alipay",
+      label: <Link to={`/devices/${ip}/statistic/365`}>365 Days</Link>,
+      key: "365days",
+      icon: <AppstoreOutlined />,
+    },
+    {
+      label: <Link to={`/devices/${ip}/alarms/`}>Alarms</Link>,
+      key: "alarms",
+      icon: <AppstoreOutlined />,
+    },
+    {
+      label: <Link to={`/devices/${ip}/log`}>Log</Link>,
+      key: "lò",
+      icon: <AppstoreOutlined />,
     },
     {
       label: <Link to={`/devices/${ip}/info`}>Info</Link>,
@@ -89,7 +61,7 @@ const Device = () => {
       icon: <InfoCircleOutlined />,
     },
     {
-      label: "Settings",
+      label: <Link to={`/devices/${ip}/settings`}>Settings</Link>,
       key: "settings",
       icon: <SettingOutlined />,
     },

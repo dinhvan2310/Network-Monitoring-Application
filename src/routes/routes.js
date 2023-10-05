@@ -5,7 +5,13 @@ import config from "config"
 import Device from "pages/device"
 import DeviceInfo, { deviceInfoLoader } from "pages/device/deviceInfo"
 import { defaultLayoutLoader } from "layouts/DefaultLayout/DefaultLayout"
-import DeviceHome from "pages/device/deviceHome"
+import DeviceHome from "pages/device/deviceOverview"
+import DeviceSettings from "pages/device/deviceSettings"
+import DeviceOverview from "pages/device/deviceOverview"
+import DeviceStatistic from "pages/device/deviceStatistic"
+import DeviceAlarms from "pages/device/deviceAlarms"
+import DeviceLog from "pages/device/deviceLog"
+import AddSensor from "pages/device/addSensor"
 
 const routes = [
     {
@@ -22,14 +28,34 @@ const routes = [
           element: <Device/>,
           children: [
             {
-              path: config.routes.deviceHome,
-              element: <DeviceHome/>,
+              path: config.routes.deviceOverview,
+              element: <DeviceOverview/>,
+            },
+            {
+              path: config.routes.deviceStatistic,
+              element: <DeviceStatistic/>,
+            },
+            {
+              path: config.routes.deviceAlarms,
+              element: <DeviceAlarms/>,
+            },
+            {
+              path: config.routes.deviceLog,
+              element: <DeviceLog/>,
             },
             {
               path: config.routes.deviceInfo,
               loader: deviceInfoLoader,
               element: <DeviceInfo/>,
             },
+            {
+              path: config.routes.deviceSettings,
+              element: <DeviceSettings/>,
+            },
+            {
+              path: config.routes.addSensor,
+              element: <AddSensor/>,
+            }
           ]
         },
         {
