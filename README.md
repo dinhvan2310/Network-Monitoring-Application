@@ -55,6 +55,7 @@
         bao gồm tỷ lệ sử dụng, thời gian sử dụng, thông tin về quá trình, ...
 
   ![Alt text](image.png)
+  ![Alt text](image.png)
 
   <video src="20231011-1020-03.0425121-1.mp4" controls title="Title"></video>
 
@@ -66,6 +67,7 @@
         xác định quá trình nào đang sử dụng nhiều CPU, kiểm tra tình trạng tải CPU trên thiết bị Cisco và thực hiện các biện pháp quản lý và điều chỉnh hợp lý. 
 
 - Các thông tin cơ bản có thể nhận được từ SNMP
+  
   
       Using SNMP, you can retrieve various types of information from a Cisco device. Here are some examples:
 
