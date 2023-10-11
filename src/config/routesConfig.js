@@ -1,14 +1,14 @@
 const routes = {
     home: '/',
     settings: '/settings',
-    devices: '/devices/:ip',
-    deviceOverview: '/devices/:ip/overview',
-    deviceInfo: '/devices/:ip/info',
-    deviceSettings: '/devices/:ip/settings',
-    deviceStatistic: '/devices/:ip/statistic/:days',
-    deviceAlarms: '/devices/:ip/alarms',
-    deviceLog: '/devices/:ip/log',
-    addSensor: '/devices/:ip/addSensor',
+    devices: '/devices/:id',
+    deviceOverview: '/devices/:id',
+    deviceInfo: '/devices/:id/info',
+    deviceSettings: '/devices/:id/settings',
+    deviceStatistic: '/devices/:id/statistic/:days',
+    deviceAlarms: '/devices/:id/alarms',
+    deviceLog: '/devices/:id/log',
+    addSensor: '/devices/:id/addSensor',
 };
 
 export default routes;

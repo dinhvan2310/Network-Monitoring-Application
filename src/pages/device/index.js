@@ -26,7 +26,7 @@ const Device = () => {
 
   const items = [
     {
-      label: <Link to={`/devices/${ip}/overview`}>Overview</Link>,
+      label: <Link to={`/devices/${ip}`}>Overview</Link>,
       key: "overview",
       icon: <AppstoreOutlined />,
     },

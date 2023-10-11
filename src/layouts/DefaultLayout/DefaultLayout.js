@@ -24,7 +24,7 @@ import {
   Breadcrumb,
 } from "antd";
 import { Link, Outlet, useLoaderData, useLocation } from "react-router-dom";
-import { addDevice, getDevices } from "services/devicesService";
+import { addDevice, getAllDevices } from "services/devicesService";
 import logo from "assets/images/logo/logo.svg";
 import { disableBreadcrumbItems } from "config/breadcrumbConfig";
 
@@ -33,7 +33,7 @@ const { Header, Sider, Content, Footer } = Layout;
 
 //Loader
 export const defaultLayoutLoader = async () => {
-  const devices = await getDevices();
+  const devices = await getAllDevices();
   return devices;
 };
 
@@ -48,10 +48,8 @@ const DefaultLayout = () => {
   const location = useLocation();
   const pathSnippets = location.pathname.split("/").filter((i) => i);
 
-  useEffect(() => {}, [devices]);
 
   
-  //!Breadcrumb Items
   const extraBreadcrumbItems = pathSnippets.map((_, index) => {
     const url = `/${pathSnippets.slice(0, index + 1).join("/")}`;
     if (disableBreadcrumbItems.includes(_)) {
@@ -81,21 +79,17 @@ const DefaultLayout = () => {
 
   const sidebarDevicesItems = devices.map((device) => {
     return {
-      label: <Link to={`/devices/${device.ip}/overview`}>{device.name}</Link>,
-      key: `/devices/${device.ip}`,
+      label: <Link to={`/devices/${device.id}`}>{device.deviceName}</Link>,
+      key: `/devices/${device.id}`,
       icon: <HddOutlined />,
     };
   });
 
-  //!Sidebar Menu Items
   const sidebarMenuItems = [
     {
       label: <Link to={"/"}>Home</Link>,
       key: "/",
       icon: <HomeOutlined />,
-      onClick: () => {
-        console.log("Home");
-      },
     },
     {
       label: "Devices",

@@ -1,5 +1,5 @@
 import { PlusOutlined } from "@ant-design/icons";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Col, DatePicker, Form, Input, Radio, Rate, Row } from "antd";
 import {
   AndroidOutlined,
@@ -52,6 +52,8 @@ import {
   CoffeeOutlined,
 } from "@ant-design/icons";
 import Title from "antd/es/skeleton/Title";
+import { getDeviceSettingsById } from "services/devicesService";
+import { useParams } from "react-router-dom";
 
 const { RangePicker } = DatePicker;
 const { TextArea } = Input;
@@ -253,8 +255,20 @@ const options = [
 ];
 
 function DeviceSettings() {
+  const id = useParams().id;
   const [PriorityValue, setPriorityValue] = useState(3);
   const [value1, setValue1] = useState("Apple");
+
+  const [data, setData] = useState({});
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setData({data, ...await getDeviceSettingsById(id)})
+    }
+    fetchData()
+  }, [])
+
+  console.log(data)
 
   return (
     <>
@@ -283,7 +297,7 @@ function DeviceSettings() {
         }}
       >
         <Form.Item label="Device Name">
-          <Input />
+          <Input value={data.deviceName}/>
         </Form.Item>
         <Form.Item label="Monitoring Status">
           <Radio.Group>
@@ -295,7 +309,7 @@ function DeviceSettings() {
           </Radio.Group>
         </Form.Item>
         <Form.Item label="IPv4 Address">
-          <Input />
+          <Input value={data.deviceIpv4}/>
         </Form.Item>
         <Form.Item label="Priority">
           <Rate
@@ -303,7 +317,7 @@ function DeviceSettings() {
             defaultValue={3}
             tooltips={priorityDesc}
             onChange={setPriorityValue}
-            value={PriorityValue}
+            value={data.priority}
           />
           {PriorityValue ? (
             <span className="ant-rate-text">
@@ -395,18 +409,18 @@ function DeviceSettings() {
             <Radio checked value={"v1"}>
               SNMP v1
             </Radio>
-            <Radio value={"v2"}> SNMP v2c (default) </Radio>
+            <Radio checked value={"v2"}> SNMP v2c (default) </Radio>
             <Radio value={"v3"}> SNMP v3 </Radio>
           </Radio.Group>
         </Form.Item>
         <Form.Item label="SNMP Community String">
-          <Input />
+          <Input value={data.snmpCommunity}/>
         </Form.Item>
         <Form.Item label="SNMP Port">
-          <Input />
+          <Input value={data.snmpPort}/>
         </Form.Item>
         <Form.Item label="SNMP Timeout">
-          <Input />
+          <Input value={data.timeout}/>
         </Form.Item>
         <Form.Item>
           <Button type="primary" htmlType="submit">

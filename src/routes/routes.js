@@ -45,7 +45,7 @@ const routes = [
             },
             {
               path: config.routes.deviceInfo,
-              loader: deviceInfoLoader,
+              // loader: deviceInfoLoader,
               element: <DeviceInfo/>,
             },
             {
