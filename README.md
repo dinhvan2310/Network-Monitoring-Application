@@ -1,38 +1,72 @@
-- MIB là gì 
-      MIB là viết tắt của "Management Information Base" (Cơ sở thông tin quản lý). Trong ngữ cảnh của giao thức SNMP (Simple Network Management Protocol), MIB là một cấu trúc dữ liệu được sử dụng để mô tả thông tin quản lý của các thiết bị mạng.
+- MIB là gì
+  
+        MIB là viết tắt của "Management Information Base" (Cơ sở thông tin quản lý).
 
-      MIB định nghĩa các đối tượng (objects) mà hệ thống quản lý có thể truy vấn thông qua SNMP. Mỗi đối tượng trong MIB có một định danh duy nhất được gọi là Object Identifier (OID). Các OID được sắp xếp theo cấu trúc cây, tạo thành một hệ thống phân cấp.
+        Trong ngữ cảnh của giao thức SNMP (Simple Network Management Protocol), MIB là một cấu trúc dữ liệu được sử dụng để mô tả thông tin quản lý của các thiết bị mạng.
 
-      MIB chứa thông tin chi tiết về các thuộc tính, trạng thái và thông số khác của các thành phần trong một hệ thống mạng. Nó mô tả cú pháp và ý nghĩa của từng đối tượng, cho phép hệ thống quản lý truy cập và điều khiển các thiết bị mạng thông qua SNMP.
+        MIB định nghĩa các đối tượng (objects) mà hệ thống quản lý có thể truy vấn thông qua SNMP. Mỗi đối tượng trong MIB
 
-      Mỗi nhà sản xuất thiết bị mạng, như Cisco, Juniper, hoặc HP, cung cấp các tập tin MIB cho các sản phẩm của họ. Các tập tin MIB này chứa định nghĩa của các đối tượng mà SNMP có thể truy vấn và quản lý trên các thiết bị của nhà sản xuất đó.
+        có một định danh duy nhất được gọi là Object Identifier (OID).
 
-      Các công cụ quản lý mạng, như SNMP Manager hoặc MIB Browser, sử dụng MIB để tạo ra các yêu cầu truy vấn và hiển thị thông tin từ các thiết bị mạng.
+        Các OID được sắp xếp theo cấu trúc cây, tạo thành một hệ thống phân cấp.
 
-      Các tập tin MIB của mỗi nhà sản xuất thường đi kèm với phần mềm quản lý mạng của họ hoặc có thể tải xuống từ trang web hỗ trợ của nhà sản xuất. Chúng thường được cung cấp dưới dạng các tệp tin văn bản với định dạng chuẩn, nhưng được đặt phần mở rộng là ".mib" hoặc ".txt".
+        MIB chứa thông tin chi tiết về các thuộc tính, trạng thái và thông số khác của các thành phần trong một hệ thống mạng.
 
-      Các tập tin MIB này cung cấp cho các công cụ quản lý mạng (như SNMP Manager hoặc MIB Browser) thông tin về cú pháp và ý nghĩa của các đối tượng (objects) mà SNMP có thể truy vấn và quản lý trên các thiết bị của nhà sản xuất đó. Thông qua tập tin MIB, các công cụ này có thể hiển thị danh sách các đối tượng, OID (Object Identifier) tương ứng và thuộc tính của chúng.
+        Nó mô tả cú pháp và ý nghĩa của từng đối tượng, cho phép hệ thống quản lý truy cập và điều khiển các thiết bị mạng thông qua SNMP.
 
-      Quản trị viên mạng có thể sử dụng các tập tin MIB này để truy vấn và thu thập thông tin từ các thiết bị mạng của nhà sản xuất tương ứng, cũng như để theo dõi và quản lý các thành phần mạng.
+        Mỗi nhà sản xuất thiết bị mạng, như Cisco, Juniper, hoặc HP, cung cấp các tập tin MIB cho các sản phẩm của họ.
+
+        Các tập tin MIB này chứa định nghĩa của các đối tượng mà SNMP có thể truy vấn và quản lý trên các thiết bị của nhà sản xuất đó.
+
+        Các công cụ quản lý mạng, như SNMP Manager hoặc MIB Browser, sử dụng MIB để tạo ra các yêu cầu truy vấn và hiển thị thông tin từ các thiết bị mạng.
+
+        Các tập tin MIB của mỗi nhà sản xuất thường đi kèm với phần mềm quản lý mạng của họ hoặc có thể tải xuống từ trang web hỗ trợ của nhà sản xuất.
+
+        Chúng thường được cung cấp dưới dạng các tệp tin văn bản với định dạng chuẩn, nhưng được đặt phần mở rộng là ".mib" hoặc ".txt".
+
+        Các tập tin MIB này cung cấp cho các công cụ quản lý mạng (như SNMP Manager hoặc MIB Browser) thông tin về cú pháp và ý nghĩa của các đối tượng (objects)
+
+        mà SNMP có thể truy vấn và quản lý trên các thiết bị của nhà sản xuất đó. Thông qua tập tin MIB, các công cụ này có thể hiển thị danh sách các đối tượng,
+
+        OID (Object Identifier) tương ứng và thuộc tính của chúng.
+
+        Quản trị viên mạng có thể sử dụng các tập tin MIB này để truy vấn và thu thập thông tin từ các thiết bị mạng của nhà sản xuất tương ứng,
+
+        cũng như để theo dõi và quản lý các thành phần mạng.
 
 - CISCO-PROCESS_MIB
-      CISCO-PROCESS-MIB là một MIB (Management Information Base) của Cisco được sử dụng để giám sát và quản lý quá trình (process) trong các thiết bị mạng Cisco thông qua SNMP (Simple Network Management Protocol).
 
-      MIB này cung cấp các đối tượng (objects) và các thuộc tính liên quan đến quá trình (process) trong hệ thống Cisco, cho phép quản trị viên mạng thu thập thông tin về sử dụng CPU và bộ nhớ của các quá trình đang chạy trên thiết bị.
+        CISCO-PROCESS-MIB là một MIB (Management Information Base) của Cisco được sử dụng để giám sát và quản lý quá trình (process)
 
-      Dưới đây là một số ví dụ về các đối tượng (objects) quan trọng trong CISCO-PROCESS-MIB:
+        trong các thiết bị mạng Cisco thông qua SNMP (Simple Network Management Protocol).
 
-       - cpmCPUTotal5minRev (.1.3.6.1.4.1.9.9.109.1.1.1.1.8): Đối tượng này cung cấp tỷ lệ sử dụng CPU trong 5 phút gần nhất trên thiết bị Cisco.
+        MIB này cung cấp các đối tượng (objects) và các thuộc tính liên quan đến quá trình (process) trong hệ thống Cisco,
 
-      - cpmCPUTotalPhysicalIndex (.1.3.6.1.4.1.9.9.109.1.1.1.1.2): Đối tượng này cung cấp danh sách các chỉ mục (index) của các CPU vật lý trên thiết bị.
+        cho phép quản trị viên mạng thu thập thông tin về sử dụng CPU và bộ nhớ của các quá trình đang chạy trên thiết bị.
 
-      - cpmCPUTotalEntry (.1.3.6.1.4.1.9.9.109.1.1.1.1): Đối tượng này cung cấp thông tin chi tiết về sử dụng CPU của từng CPU trên thiết bị, bao gồm tỷ lệ sử dụng, thời gian sử dụng, thông tin về quá trình, ...
+        Dưới đây là một số ví dụ về các đối tượng (objects) quan trọng trong CISCO-PROCESS-MIB:
 
-      ![Alt text](image.png)
+        - cpmCPUTotal5minRev (.1.3.6.1.4.1.9.9.109.1.1.1.1.8): Đối tượng này cung cấp tỷ lệ sử dụng CPU trong 5 phút gần nhất trên thiết bị Cisco.
 
-      Thông qua các đối tượng và thuộc tính trong CISCO-PROCESS-MIB, quản trị viên có thể theo dõi sử dụng CPU của các quá trình, xác định quá trình nào đang sử dụng nhiều CPU, kiểm tra tình trạng tải CPU trên thiết bị Cisco và thực hiện các biện pháp quản lý và điều chỉnh hợp lý. 
+        - cpmCPUTotalPhysicalIndex (.1.3.6.1.4.1.9.9.109.1.1.1.1.2): Đối tượng này cung cấp danh sách các chỉ mục (index) của các CPU vật lý trên thiết bị.
+
+        - cpmCPUTotalEntry (.1.3.6.1.4.1.9.9.109.1.1.1.1): Đối tượng này cung cấp thông tin chi tiết về sử dụng CPU của từng CPU trên thiết bị,
+
+        bao gồm tỷ lệ sử dụng, thời gian sử dụng, thông tin về quá trình, ...
+
+  ![Alt text](image.png)
+
+  <video src="20231011-1020-03.0425121-1.mp4" controls title="Title"></video>
+
+
+  
+  
+
+        Thông qua các đối tượng và thuộc tính trong CISCO-PROCESS-MIB, quản trị viên có thể theo dõi sử dụng CPU của các quá trình,
+        xác định quá trình nào đang sử dụng nhiều CPU, kiểm tra tình trạng tải CPU trên thiết bị Cisco và thực hiện các biện pháp quản lý và điều chỉnh hợp lý. 
 
 - Các thông tin cơ bản có thể nhận được từ SNMP
+  
       Using SNMP, you can retrieve various types of information from a Cisco device. Here are some examples:
 
       1. System Information:
