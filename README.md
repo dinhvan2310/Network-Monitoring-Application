@@ -56,10 +56,11 @@
 
   ![Alt text](image.png)
 
-  <video src="20231011-1020-03.0425121-1.mp4" controls title="Title"></video>
-
-
+  -  Video
+    
+    ![VIDEO](20231011-1020-03.0425121-1.mp4)
   
+
   
 
         Thông qua các đối tượng và thuộc tính trong CISCO-PROCESS-MIB, quản trị viên có thể theo dõi sử dụng CPU của các quá trình,
