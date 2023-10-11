@@ -55,7 +55,6 @@
         bao gồm tỷ lệ sử dụng, thời gian sử dụng, thông tin về quá trình, ...
 
   ![Alt text](image.png)
-  ![Alt text](image.png)
 
   <video src="20231011-1020-03.0425121-1.mp4" controls title="Title"></video>
 
