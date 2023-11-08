@@ -1,89 +1,46 @@
 import React, { useEffect, useState } from "react";
 import {
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
-  HomeOutlined,
-  DesktopOutlined,
-  SettingOutlined,
-  AppstoreAddOutlined,
-  HddOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
-import {
   Layout,
   Menu,
   Button,
   theme,
-  Modal,
-  Form,
-  message,
-  Input,
   Space,
   Avatar,
   Typography,
-  Breadcrumb,
+  Radio,
 } from "antd";
-import { Link, Outlet, useLoaderData, useLocation } from "react-router-dom";
-import { addDevice, getAllDevices } from "services/devicesService";
+import {DesktopOutlined, HomeOutlined, AppstoreOutlined, SettingOutlined, UserOutlined, MenuUnfoldOutlined, MonitorOutlined, DatabaseOutlined,
+        MenuFoldOutlined, UserSwitchOutlined, LogoutOutlined, QuestionOutlined, UnorderedListOutlined, ProjectOutlined} from '@ant-design/icons';
 import logo from "assets/images/logo/logo.svg";
-import { disableBreadcrumbItems } from "config/breadcrumbConfig";
+import { Link, Outlet } from "react-router-dom";
+import userService from "services/userService";
 
 // ----------------------------------------------------------------------------------
 const { Header, Sider, Content, Footer } = Layout;
 
-//Loader
-export const defaultLayoutLoader = async () => {
-  const devices = await getAllDevices();
-  return devices;
-};
-
 //Function Component
 const DefaultLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
-  const [isAddDeviceOpen, setIsAddDeviceOpen] = useState(false);
-  const [devices, setDevices] = useState(useLoaderData());
+  const Title = Typography.Title;
+  const [userData, setUserData] = useState({})
 
-  const { Title } = Typography;
-  const [form] = Form.useForm();
-  const location = useLocation();
-  const pathSnippets = location.pathname.split("/").filter((i) => i);
-
-
-  
-  const extraBreadcrumbItems = pathSnippets.map((_, index) => {
-    const url = `/${pathSnippets.slice(0, index + 1).join("/")}`;
-    if (disableBreadcrumbItems.includes(_)) {
-      return {
-        title: _,
-      };
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const respone = await userService.checkAuthentication(localStorage.getItem("token"))
+      setUserData(respone)
+      console.log(respone)
     }
-    return {
-      key: url,
-      title: <Link to={url}>{_}</Link>,
-    };
-  });
+    fetchUserData()
+  }, [])
 
-  const breadcrumbItems = [
-    {
-      title: (
-        <Link to="/">
-          <Space>
-            <HomeOutlined />
-            <span>Home</span>
-          </Space>
-        </Link>
-      ),
-      key: "home",
-    },
-  ].concat(extraBreadcrumbItems);
+  useEffect(() => {
+    const fetchDevices = async () => {
+      
+    }
+    fetchDevices()
+  }, [])
 
-  const sidebarDevicesItems = devices.map((device) => {
-    return {
-      label: <Link to={`/devices/${device.id}`}>{device.deviceName}</Link>,
-      key: `/devices/${device.id}`,
-      icon: <HddOutlined />,
-    };
-  });
+
 
   const sidebarMenuItems = [
     {
@@ -92,27 +49,86 @@ const DefaultLayout = () => {
       icon: <HomeOutlined />,
     },
     {
-      label: "Devices",
-      key: "/devices",
-      icon: <DesktopOutlined />,
+      label: "Monitoring",
+      key: "/monitoring",
+      icon: <MonitorOutlined />,
       children: [
-        ...sidebarDevicesItems,
         {
-          label: "Add devices",
-          key: "/add-devices",
-          icon: <AppstoreAddOutlined />,
-          onClick: () => {
-            console.log("Add devices");
-            setIsAddDeviceOpen(true);
-          },
+          label: <Link to={"/monitoring/hosts"}>Hosts</Link>,
+          key: "/monitoring/hosts",
+          icon: <DesktopOutlined />,
         },
+        {
+          label: <Link to={"/monitoring/latestData?hostid=all"}>Latest Data</Link>,
+          key: "/monitoring/latestData",
+          icon: <DatabaseOutlined />,
+        }
+      ]
+    },
+    {
+      label: "Data Collection",
+      key: "/dataCollection",
+      icon: <DesktopOutlined/>,
+      children: [
+        {
+          label: <Link to={"/dataCollection/hosts"}>Hosts</Link>,
+          key: "/dataCollection/hosts",
+          icon: <DesktopOutlined />,
+        },
+        {
+          label: <Link to={"/dataCollection/hostGroups"} >Host Groups</Link>,
+          key: "/dataCollection/hostGroups",
+          icon: <AppstoreOutlined />,
+        },
+        {
+          label: <Link to={"/dataCollection/templates"} >Templates</Link>,
+          key: "/dataCollection/templates",
+          icon: <ProjectOutlined />,
+        },
+        {
+          label: <Link to={"/dataCollection/templateGroups"} >Template Groups</Link>,
+          key: "/dataCollection/templateGroups",
+          icon: <UnorderedListOutlined />,
+        }
       ],
     },
     {
-      label: <Link to={"/settings"}>Settings</Link>,
-      key: "/settings",
+      label: "Users",
+      key: "/USERS",
+      icon: <UserOutlined />,
+      children: [
+        {
+          label: <Link to={"/users"}>Users</Link>,
+          key: "/users",
+          icon: <UserOutlined />,
+        },
+        {
+          label: "User roles",
+          key: "/users/roles",
+          icon: <UserSwitchOutlined />,
+        }
+      ]
+    },
+    {
+      label: "Help",
+      key: "/help",
+      icon: <QuestionOutlined />,
+    },
+    {
+      label: "User settings",
+      key: "/user-settings",
       icon: <SettingOutlined />,
     },
+    {
+      label: "Logout",
+      key: "/logout",
+      icon: <LogoutOutlined />,
+      onClick: () => {
+        localStorage.removeItem("token");
+        userService.logout();
+        window.location.href = "/login";
+      }
+    }
   ];
 
   const {
@@ -121,59 +137,7 @@ const DefaultLayout = () => {
 
   return (
     <Layout>
-      <Modal
-        title="Add Device"
-        open={isAddDeviceOpen}
-        onCancel={() => setIsAddDeviceOpen(false)}
-        footer={null}
-      >
-        <Form
-          form={form}
-          layout="vertical"
-          name="addDevice"
-          onFinishFailed={() => {
-            message.error("Submit failed!");
-          }}
-          onFinish={(values) => {
-            const key = "addDevice";
-            setIsAddDeviceOpen(false);
-
-            message.open({
-              key,
-              type: "loading",
-              content: "Loading...",
-            });
-            setDevices([...devices, values]);
-            addDevice(values).then((res) => {
-              message.open({
-                key,
-                type: "success",
-                content: "Successfully added device",
-                duration: 2,
-              });
-            });
-
-            console.log(values);
-          }}
-        >
-          <Form.Item
-            name="name"
-            label="Device Name"
-            rules={[{ required: true }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item name="ip" label="Device Ip" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit">
-              Submit
-            </Button>
-          </Form.Item>
-        </Form>
-      </Modal>
-
+ 
       <Sider
         style={{ height: "100vh" }}
         trigger={null}
@@ -197,7 +161,6 @@ const DefaultLayout = () => {
           }}
           theme="light"
           mode="inline"
-          defaultSelectedKeys={[useLocation().pathname]}
           items={sidebarMenuItems}
         ></Menu>
       </Sider>
@@ -234,13 +197,12 @@ const DefaultLayout = () => {
                   height: 64,
                 }}
               />
-              <Breadcrumb items={breadcrumbItems} />
             </Space>
           </div>
 
           <Space size={16}>
             <Title style={{ marginBottom: 0 }} level={4}>
-              Lê Thanh Việt
+              {userData.result?.name}
             </Title>
             <Avatar
               style={{ marginRight: 16 }}
@@ -260,7 +222,7 @@ const DefaultLayout = () => {
             overflow: "scroll",
           }}
         >
-          <Outlet />
+          <Outlet/>
         </Content>
         <Footer
           style={{

@@ -1,151 +1,84 @@
-- MIB là gì
-  
-        MIB là viết tắt của "Management Information Base" (Cơ sở thông tin quản lý).
+getAllDevices() -> GET: http://localhost:8080/api/devices
+      // trả về List DeviceEntity
+      return {
+            
+      }
 
-        Trong ngữ cảnh của giao thức SNMP (Simple Network Management Protocol), MIB là một cấu trúc dữ liệu được sử dụng để mô tả thông tin quản lý của các thiết bị mạng.
+addDevice(deivce) -> POST: http://localhost:8080/api/devices
+      // body param: , id cho 0, tạo mới id, UUID.randomUUID().toString()
+      // return về DeviceEntity mới tạo
+getDeviceById(id) -> GET: http://localhost:8080/api/devices/{id}
+      // return về DeviceEntity
 
-        MIB định nghĩa các đối tượng (objects) mà hệ thống quản lý có thể truy vấn thông qua SNMP. Mỗi đối tượng trong MIB
+getDeviceSettingsById(id) -> GET: http://localhost:8080/api/devices/{id}/settings
+      // return DeviceSettings
+updateDeviceSettingsById(id, deviceSettings) -> PUT: http://localhost:8080/api/devices/{id}/settings
+      // body param: deviceSettings
+      // return DeviceSettings
 
-        có một định danh duy nhất được gọi là Object Identifier (OID).
+getDeviceOIDsById(id) -> GET: http://localhost:8080/api/devices/{id}/oids
+      // return List DeviceOIDs
+addDeviceOIDsById(id, deviceOID) -> POST: http://localhost:8080/api/devices/{id}/oids
+      // body param: deviceOID
+      // return deviceOID
+deleteDeviceOIDsById(id, deviceOID) -> DELETE: http://localhost:8080/api/devices/{id}/oids/{oidId}
+      // return DeviceOID
 
-        Các OID được sắp xếp theo cấu trúc cây, tạo thành một hệ thống phân cấp.
+getDeviceOIDSettingsById(id, oidId) -> GET: http://localhost:8080/api/devices/{id}/oids/{oidId}/settings
+      // return DeviceOIDSettings
+updateDeviceOIDSettingsById(id, oidId, deviceOIDSettings) -> PUT: http://localhost:8080/api/devices/{id}/oids/{oidId}/settings
+      // body param: deviceOIDSettings
+      // return DeviceOIDSettings
 
-        MIB chứa thông tin chi tiết về các thuộc tính, trạng thái và thông số khác của các thành phần trong một hệ thống mạng.
+getDeviceOIDValuesById(id, oidId, from, to) -> GET: http://localhost:8080/api/devices/{id}/oids/{oidId}/values?from={from}&to={to}
+      // from, to: yyyy-MM-dd, query param
+      // lấy dữ liệu từ from đến to
+      // return List DeviceOIDValues
+generateDeviceOIDValuesById(id, oidId) -> POST: http://localhost:8080/api/devices/{id}/oids/{oidId}/values
+      // bên server tự gọi snmp lấy giá trị và lưu vào db sao đó trả về phần tử đầu tiên trong DeviceOIDValues
+      // return DeviceOIDValues.GetFirst()
 
-        Nó mô tả cú pháp và ý nghĩa của từng đối tượng, cho phép hệ thống quản lý truy cập và điều khiển các thiết bị mạng thông qua SNMP.
+getDeviceOIDChildOIDsById(id, oidId) -> GET: http://localhost:8080/api/devices/{id}/oids/{oidId}/childoids
+      // return List DeviceOIDs
+getDeviceOIDCHildOIDById(id, oidId, childOidId) -> GET: http://localhost:8080/api/devices/{id}/oids/{oidId}/childoids/{childOidId}
+      // return DeviceOID
+addDeviceOIDChildOIDsById(id, oidId, deviceOID) -> POST: http://localhost:8080/api/devices/{id}/oids/{oidId}/childoids
+      // body param: deviceOID
+      // return deviceOID
+deleteDeviceOIDChildOIDsById(id, oidId, childOidId) -> DELETE: http://localhost:8080/api/devices/{id}/oids/{oidId}/childoids/{childOidId}
+      // return DeviceOID
 
-        Mỗi nhà sản xuất thiết bị mạng, như Cisco, Juniper, hoặc HP, cung cấp các tập tin MIB cho các sản phẩm của họ.
-
-        Các tập tin MIB này chứa định nghĩa của các đối tượng mà SNMP có thể truy vấn và quản lý trên các thiết bị của nhà sản xuất đó.
-
-        Các công cụ quản lý mạng, như SNMP Manager hoặc MIB Browser, sử dụng MIB để tạo ra các yêu cầu truy vấn và hiển thị thông tin từ các thiết bị mạng.
-
-        Các tập tin MIB của mỗi nhà sản xuất thường đi kèm với phần mềm quản lý mạng của họ hoặc có thể tải xuống từ trang web hỗ trợ của nhà sản xuất.
-
-        Chúng thường được cung cấp dưới dạng các tệp tin văn bản với định dạng chuẩn, nhưng được đặt phần mở rộng là ".mib" hoặc ".txt".
-
-        Các tập tin MIB này cung cấp cho các công cụ quản lý mạng (như SNMP Manager hoặc MIB Browser) thông tin về cú pháp và ý nghĩa của các đối tượng (objects)
-
-        mà SNMP có thể truy vấn và quản lý trên các thiết bị của nhà sản xuất đó. Thông qua tập tin MIB, các công cụ này có thể hiển thị danh sách các đối tượng,
-
-        OID (Object Identifier) tương ứng và thuộc tính của chúng.
-
-        Quản trị viên mạng có thể sử dụng các tập tin MIB này để truy vấn và thu thập thông tin từ các thiết bị mạng của nhà sản xuất tương ứng,
-
-        cũng như để theo dõi và quản lý các thành phần mạng.
-
-- CISCO-PROCESS_MIB
-
-        CISCO-PROCESS-MIB là một MIB (Management Information Base) của Cisco được sử dụng để giám sát và quản lý quá trình (process)
-
-        trong các thiết bị mạng Cisco thông qua SNMP (Simple Network Management Protocol).
-
-        MIB này cung cấp các đối tượng (objects) và các thuộc tính liên quan đến quá trình (process) trong hệ thống Cisco,
-
-        cho phép quản trị viên mạng thu thập thông tin về sử dụng CPU và bộ nhớ của các quá trình đang chạy trên thiết bị.
-
-        Dưới đây là một số ví dụ về các đối tượng (objects) quan trọng trong CISCO-PROCESS-MIB:
-
-        - cpmCPUTotal5minRev (.1.3.6.1.4.1.9.9.109.1.1.1.1.8): Đối tượng này cung cấp tỷ lệ sử dụng CPU trong 5 phút gần nhất trên thiết bị Cisco.
-
-        - cpmCPUTotalPhysicalIndex (.1.3.6.1.4.1.9.9.109.1.1.1.1.2): Đối tượng này cung cấp danh sách các chỉ mục (index) của các CPU vật lý trên thiết bị.
-
-        - cpmCPUTotalEntry (.1.3.6.1.4.1.9.9.109.1.1.1.1): Đối tượng này cung cấp thông tin chi tiết về sử dụng CPU của từng CPU trên thiết bị,
-
-        bao gồm tỷ lệ sử dụng, thời gian sử dụng, thông tin về quá trình, ...
-
-  ![Alt text](image.png)
-  ![Alt text](image.png)
-
-  <video src="20231011-1020-03.0425121-1.mp4" controls title="Title"></video>
-
-
-  
-  
-
-        Thông qua các đối tượng và thuộc tính trong CISCO-PROCESS-MIB, quản trị viên có thể theo dõi sử dụng CPU của các quá trình,
-        xác định quá trình nào đang sử dụng nhiều CPU, kiểm tra tình trạng tải CPU trên thiết bị Cisco và thực hiện các biện pháp quản lý và điều chỉnh hợp lý. 
-
-- Các thông tin cơ bản có thể nhận được từ SNMP
-  
-  
-      Using SNMP, you can retrieve various types of information from a Cisco device. Here are some examples:
-
-      1. System Information:
-      - System description (sysDescr)
-      - System name (sysName)
-      - System location (sysLocation)
-      - System contact (sysContact)
-      - System uptime (sysUpTime)
-
-      2. Interface Statistics:
-      - Interface status (ifOperStatus)
-      - Input/output bytes or packets on an interface (ifInOctets, ifOutOctets, ifInUcastPkts, ifOutUcastPkts, etc.)
-      - Interface speed (ifSpeed)
-      - Interface errors and discards (ifInErrors, ifOutErrors, ifInDiscards, ifOutDiscards)
-
-      3. CPU and Memory Utilization:
-      - CPU utilization (ciscoProcessCPU, cpmCPUTotal5minRev)
-      - Memory utilization (ciscoMemoryPoolUsed)
-
-      4. Network Routing and IP Addressing:
-      - Routing table (ipRouteTable)
-      - ARP table (ipNetToMediaTable)
-      - IP address information (ipAdEntAddr, ipAdEntNetMask, ipAdEntIfIndex)
-
-      5. VLAN Configuration and Trunking:
-      - VLAN information (vlanTrunkPortDynamicStatus, vlanTrunkPortEncapsulationOperType)
-      - Trunking status (dot1qTrunkPortStatus)
-
-      6. Network Device Performance and Health:
-      - Temperature (ciscoEnvMonTemperatureStatusValue)
-      - Fan status (ciscoEnvMonFanStatusValue)
-      - Power supply status (ciscoEnvMonSupplyStatusValue)
-      - Interface bandwidth utilization (ifInOctets, ifOutOctets, ifSpeed)
-
-      7. Network Security:
-      - SNMP community strings (snmpCommunityTable)
-      - Access control lists (ciscoAccessControlListName, ciscoAccessControlListAction)
-      
+deleteDevice(id) -> DELETE: http://localhost:8080/api/devices/{id}
+      // return DeviceEntity
 
 
 
-## Tech Stack
 
-**Client:** 
 
-      - React, 
-      - Antd, 
-      - Axios, 
-      - Classnames, 
-      - Localforage, 
-      - Match-sorter, 
-      - React-router-dom,
-      - Sass, 
-      - Sort-by
-      - Normalize.css
 
-**Server:** 
 
-      - Springboot, 
-      - Hibernate
+
+
+
 
 
 [
       {
-            id, 
+            _id,                                
             deviceSettings: {
                   deviceName: R1,
                   deviceType: Router,
                   deviceIpv4: 192.168.137.1,
+                  deviceIcon: ,
+                  monitorStatus: true,
                   priority: 5,
-                  timeout: 30s,
-                  snmpVersion: 2c,
+                  snmpVersion: v2c,
                   snmpCommunity: public,
                   snmpPort: 161,
             },
             deviceOIDs: [
                   {
+                        deviceOIDId,           // int auto increment (0 ->)
                         deviceOIDValues: [
                               {
                                     date: 2021-08-10T12:00:00.000Z,
@@ -162,10 +95,12 @@
                               oidKey: .1.3.6.1.2.1.1.5.0,
                               priority: 5,
                               valueType: String,
+                              pause: false,
                               unit: null,
                         }
-                        childOID: [
+                        childDeviceOID: [
                               {
+                                    deviceChildOIDId,           // int auto increment (0 ->)
                                     deviceOIDValues: [
                                           {
                                                 date: 2021-08-10T12:00:00.000Z,
@@ -182,6 +117,7 @@
                                           oidKey: .1.3.6.1.2.1.1.5.0,
                                           priority: 5,
                                           valueType: String,
+                                          pause: false,
                                           unit: null,
                                     ]
                               },
@@ -194,60 +130,78 @@
       , ...
 ]
 
-Bảng devices:
-
-| id (primary key)| device_name | device_type | device_ip      | timeout |
-|-----------------|-------------|-------------|----------------|---------|
-| 1               | R1          | Router      | 192.168.137.1  | 30s     |
-| 2               | S1          | Switch      | 192.168.137.2  | 30s     |
-| ...             | ...         | ...         | ...            | ...     |
-
-Bảng device_oids:
-
-| id (primary key) |device_id (foreign key)| oid_key            | oid_name   |
-|-----------------|------------------------|--------------------|------------|
-| 1               | 1                      | .1.3.6.1.2.1.1.5.0 | sysName    |
-| 2               | 1                      | ...                | ...        |
-| 3               | 2                      | ...                | ...        |
-| ...             | ...                    | ...                | ...        |
-
-Bảng oid_values:
-
-| id (primary key)| device_oid_id (foreign key)| date                | value    |
-|-----------------|----------------------------|---------------------|----------|
-| 1               | 1                          | 2021-08-10T12:00:00Z| R1       |
-| 2               | 1                          | ...                 | ...      |
-| 3               | 2                          | ...                 | ...      |
-| ...             | ...                        | ...                 | ...      |
-
-Bảng child_oids:
-
-| id (primary key)| device_oid_id (foreign key)| oid_key            | oid_name   |
-|-----------------|----------------------------|--------------------|------------|
-| 1               | 1                          | .1.3.6.1.2.1.1.1.0 | sysDescr   |
-| 2               | 1                          | ...                | ...        |
-| 3               | 2                          | ...                | ...        |
-| ...             | ...                        | ...                | ...        |
-
-Bảng child_oid_values:
-
-| id (primary key)| device_oid_id (foreign key)| date                | value    |
-|-----------------|----------------------------|---------------------|----------|
-| 1               | 1                          | 2021-08-10T12:00:00Z| R1       |
-| 2               | 1                          | ...                 | ...      |
-| 3               | 2                          | ...                 | ...      |
-| ...             | ...                        | ...                 | ...      |
-
-
 // !Done
-getAllDevices() -> http://localhost:8080/api/devices
+getAllDevices() -> GET: http://localhost:8080/api/devices
+      // trả về {id, deviceName}, tạo model mới để trả về 
       return {
             id,
             deviceName,
       }
 
+// param device = deviceEntity
+addDevice(device) -> POST: http://localhost:8080/api/devices
+      // return về DeviceEntity 
+      return {
+            id,
+            deviceSettings: {
+                  deviceName,
+                  deviceType,
+                  deviceIpv4,
+                  priority,
+                  timeout,
+                  snmpVersion,
+                  snmpCommunity,
+                  snmpPort,
+            },
+            deviceOIDs: [
+                  {
+                        deviceOIDValues: [
+                              {
+                                    date,
+                                    value,
+                              },
+                              {
+                                    date,
+                                    value,
+                              },
+                        ],
+                        deviceOIDSettings: {
+                              sensorName,
+                              oidKey,
+                              priority,
+                              pause,
+                              valueType,
+                              unit,
+                        }
+                        childOID: [
+                              {
+                                    deviceOIDValues: [
+                                          {
+                                                date,
+                                                value,
+                                          },
+                                          {
+                                                date,
+                                                value,
+                                          },
+                                          ...
+                                    ],
+                                    deviceOIDSettings: [
+                                          sensorName,
+                                          oidKey,
+                                          priority,
+                                          valueType,
+                                          unit,
+                                          pause,
+                                    ]
+                              },
+                        ]
+                  },
+            ]
+      }
+
 // !Done
-getDeviceById(id) -> http://localhost:8080/api/devices/{id}
+getDeviceById(id) -> GET: http://localhost:8080/api/devices/{id}
       // return về DeviceEntity 
       return {
             id,
