@@ -82,6 +82,20 @@ const hostService = {
             "id": 1
         })
     },
+    createHost: async (host) => {
+        return httpRequests.post('', {
+            "jsonrpc": "2.0",
+            "method": "host.create",
+            "params": {
+                "host": `${host.host}`,
+                "interfaces": host.interfaces,
+                "groups": host.groups,
+                "templates": host.templates
+            },
+            "auth": `${localStorage.getItem("token")}`,
+            "id": 1
+        })
+    },
     createHostGroup: async (name) => {
         return httpRequests.post('', {
             "jsonrpc": "2.0",
