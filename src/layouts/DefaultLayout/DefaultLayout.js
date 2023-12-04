@@ -1,88 +1,234 @@
-import React, { useState } from 'react';
-import styles from './DefaultLayout.module.scss';
+import React, { useEffect, useState } from "react";
 import {
-  DesktopOutlined,
-  FileOutlined,
-  PieChartOutlined,
-  TeamOutlined,
-  UserOutlined,
-} from '@ant-design/icons';
-import { Breadcrumb, Layout, Menu, theme } from 'antd';
-import { Outlet } from 'react-router-dom';
-import classNames from 'classnames';
-const { Header, Content, Footer, Sider } = Layout;
+  Layout,
+  Menu,
+  Button,
+  theme,
+  Space,
+  Avatar,
+  Typography,
+  Radio,
+} from "antd";
+import {DesktopOutlined, HomeOutlined, AppstoreOutlined, SettingOutlined, UserOutlined, MenuUnfoldOutlined, MonitorOutlined, DatabaseOutlined,
+        MenuFoldOutlined, UserSwitchOutlined, LogoutOutlined, QuestionOutlined, UnorderedListOutlined, ProjectOutlined} from '@ant-design/icons';
+import logo from "assets/images/logo/logo.svg";
+import { Link, Outlet } from "react-router-dom";
+import userService from "services/userService";
 
-const cx = classNames.bind(styles);
+// ----------------------------------------------------------------------------------
+const { Header, Sider, Content, Footer } = Layout;
 
-function getItem(label, key, icon, children) {
-  return {
-    key,
-    icon,
-    children,
-    label,
-  };
-}
-const items = [
-  getItem('Option 1', '1', <PieChartOutlined />),
-  getItem('Option 2', '2', <DesktopOutlined />),
-  getItem('Device', 'sub1', <UserOutlined />, [
-    getItem('Router', '3'),
-    getItem('Switch', '4'),
-    getItem('Server', '5'),
-  ]),
-  getItem('Team', 'sub2', <TeamOutlined />, [getItem('Team 1', '6'), getItem('Team 2', '8')]),
-  getItem('Settings', '9', <FileOutlined />),
-];
+//Function Component
 const DefaultLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
+  const Title = Typography.Title;
+  const [userData, setUserData] = useState({})
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const respone = await userService.checkAuthentication(localStorage.getItem("token"))
+      setUserData(respone)
+    }
+    fetchUserData()
+  }, [])
+
+  useEffect(() => {
+    const fetchDevices = async () => {
+      
+    }
+    fetchDevices()
+  }, [])
+
+
+
+  const sidebarMenuItems = [
+    {
+      label: <Link to={"/"}>Home</Link>,
+      key: "/",
+      icon: <HomeOutlined />,
+    },
+    {
+      label: "Monitoring",
+      key: "/monitoring",
+      icon: <MonitorOutlined />,
+      children: [
+        {
+          label: <Link to={"/monitoring/hosts"}>Hosts</Link>,
+          key: "/monitoring/hosts",
+          icon: <DesktopOutlined />,
+        },
+        {
+          label: <Link to={"/monitoring/latestData?hostid=all"}>Latest Data</Link>,
+          key: "/monitoring/latestData",
+          icon: <DatabaseOutlined />,
+        }
+      ]
+    },
+    {
+      label: "Data Collection",
+      key: "/dataCollection",
+      icon: <DesktopOutlined/>,
+      children: [
+        {
+          label: <Link to={"/dataCollection/hosts"}>Hosts</Link>,
+          key: "/dataCollection/hosts",
+          icon: <DesktopOutlined />,
+        },
+        {
+          label: <Link to={"/dataCollection/hostGroups"} >Host Groups</Link>,
+          key: "/dataCollection/hostGroups",
+          icon: <AppstoreOutlined />,
+        },
+        {
+          label: <Link to={"/dataCollection/templates"} >Templates</Link>,
+          key: "/dataCollection/templates",
+          icon: <ProjectOutlined />,
+        },
+        {
+          label: <Link to={"/dataCollection/templateGroups"} >Template Groups</Link>,
+          key: "/dataCollection/templateGroups",
+          icon: <UnorderedListOutlined />,
+        }
+      ],
+    },
+    {
+      label: "Users",
+      key: "/USERS",
+      icon: <UserOutlined />,
+      children: [
+        {
+          label: <Link to={"/users"}>Users</Link>,
+          key: "/users",
+          icon: <UserOutlined />,
+        },
+        {
+          label: "User roles",
+          key: "/users/roles",
+          icon: <UserSwitchOutlined />,
+        }
+      ]
+    },
+    {
+      label: "Help",
+      key: "/help",
+      icon: <QuestionOutlined />,
+    },
+    {
+      label: "User settings",
+      key: "/user-settings",
+      icon: <SettingOutlined />,
+    },
+    {
+      label: "Logout",
+      key: "/logout",
+      icon: <LogoutOutlined />,
+      onClick: () => {
+        localStorage.removeItem("token");
+        userService.logout();
+        window.location.href = "/login";
+      }
+    }
+  ];
+
   const {
     token: { colorBgContainer },
   } = theme.useToken();
+
   return (
-    <Layout
-        className={cx('layout')}
-      style={{
-        minHeight: '100vh',
-      }}
-    >
-      <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
-        <div className="demo-logo-vertical" />
-        <Menu theme="dark" defaultSelectedKeys={['1']} mode="inline" items={items} />
+    <Layout>
+ 
+      <Sider
+        style={{ height: "100vh" }}
+        trigger={null}
+        collapsible
+        collapsed={collapsed}
+        theme="light"
+      >
+        {collapsed || (
+          <img
+            alt="img"
+            style={{
+              width: "100%",
+              objectFit: "cover",
+            }}
+            src={logo}
+          />
+        )}
+        <Menu
+          style={{
+            borderRight: 0,
+          }}
+          theme="light"
+          mode="inline"
+          items={sidebarMenuItems}
+        ></Menu>
       </Sider>
-      <Layout>
+      <Layout
+        style={{
+          height: "100vh",
+          overflow: "hidden",
+        }}
+      >
         <Header
           style={{
             padding: 0,
+            marginLeft: 2,
             background: colorBgContainer,
-          }}
-        />
-        <Content
-          style={{
-            margin: '0 16px',
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
           }}
         >
-          <Breadcrumb
-            style={{
-              margin: '16px 0',
-            }}
-          >
-            <Breadcrumb.Item>Home</Breadcrumb.Item>
-            <Breadcrumb.Item>Add Device</Breadcrumb.Item>
-          </Breadcrumb>
           <div
             style={{
-              padding: 24,
-              minHeight: 360,
-              background: colorBgContainer,
+              display: "flex",
+              alignItems: "center",
             }}
           >
-            
-            <Outlet />
+            <Space>
+              <Button
+                type="text"
+                icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+                onClick={() => setCollapsed(!collapsed)}
+                style={{
+                  fontSize: "16px",
+                  width: 64,
+                  height: 64,
+                }}
+              />
+            </Space>
           </div>
+
+          <Space size={16}>
+            <Title style={{ marginBottom: 0 }} level={4}>
+              {userData.result?.name}
+            </Title>
+            <Avatar
+              style={{ marginRight: 16 }}
+              size="large"
+              icon={<UserOutlined />}
+            />
+          </Space>
+        </Header>
+
+        <Content
+          style={{
+            margin: `2px 2px`,
+            padding: 24,
+            paddingTop: 0,
+            minHeight: 280,
+            background: colorBgContainer,
+            overflow: "scroll",
+          }}
+        >
+          <Outlet/>
         </Content>
         <Footer
           style={{
-            textAlign: 'center',
+            margin: "0px 2px",
+            padding: "0",
+            background: colorBgContainer,
+            textAlign: "center",
           }}
         >
           Snmp App ©2023 Created by SUZUME
