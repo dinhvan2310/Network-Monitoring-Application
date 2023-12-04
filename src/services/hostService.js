@@ -6,7 +6,7 @@ const hostService = {
             "jsonrpc": "2.0",
             "method": "host.get",
             "params": {
-                
+                "selectHostGroups": "extend",
             },
             "auth": `${localStorage.getItem("token")}`,
             "id": 1
@@ -17,11 +17,71 @@ const hostService = {
             "jsonrpc": "2.0",
             "method": "host.get",
             "params": {
-                "hostids": `${hostid}`
+                "hostids": `${hostid}`,
+                "selectHostGroups": "extend",
             },
             "auth": `${localStorage.getItem("token")}`,
             "id": 1
         })
+    },
+    createHost: async (host) => {
+        console.log(host)
+        return httpRequests.post('', {
+            "jsonrpc": "2.0",
+            "method": "host.create",
+            "params": {
+                "host": `${host.host}`,
+                "interfaces": host.interfaces,
+                "groups": host.groups,
+                "templates": host.templates
+            },
+            "auth": `${localStorage.getItem("token")}`,
+            "id": 1
+        })
+    },
+    updateHost: async (host) => {
+    //     interfaces: [
+    //   {
+    //     type: 2,
+    //     main: 1,
+    //     useip: 1,
+    //     ip: '192.168.1.123',
+    //     dns: '',
+    //     port: '161',
+    //     details: { version: '2', bulk: 1, community: 'public' }
+    //   }
+    // ],
+        // console.log({
+        //     "jsonrpc": "2.0",
+        //     "method": "host.update",
+        //     "params": {
+        //         "hostid": `${host.hostid}`,
+        //         "host": `${host.host}`,
+        //         "groups": host.groups,
+        //         "templates": host.templates,
+        //         "interfaces": host.interfaces,
+        //     },
+        //     auth: `${localStorage.getItem("token")}`,
+        //     "id": 1
+        // })
+        let updateHost = {
+            "jsonrpc": "2.0",
+            "method": "host.update",
+            "params": {
+                "hostid": `${host.hostid}`,
+                "host": `${host.host}`,
+            },
+            auth: `${localStorage.getItem("token")}`,
+            "id": 1
+        }
+        if(host.groups){
+            updateHost.params.groups = host.groups
+        }
+        if(host.templates){
+            updateHost.params.templates = host.templates
+        }
+        console.log(updateHost)
+        return httpRequests.post('', updateHost)
     },
     getHostName: async (hostid) => {
         return httpRequests.post('', {
@@ -82,20 +142,9 @@ const hostService = {
             "id": 1
         })
     },
-    createHost: async (host) => {
-        return httpRequests.post('', {
-            "jsonrpc": "2.0",
-            "method": "host.create",
-            "params": {
-                "host": `${host.host}`,
-                "interfaces": host.interfaces,
-                "groups": host.groups,
-                "templates": host.templates
-            },
-            "auth": `${localStorage.getItem("token")}`,
-            "id": 1
-        })
-    },
+    // host: 
+    // interface: 
+    
     createHostGroup: async (name) => {
         return httpRequests.post('', {
             "jsonrpc": "2.0",

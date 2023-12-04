@@ -28,7 +28,6 @@ const DefaultLayout = () => {
     const fetchUserData = async () => {
       const respone = await userService.checkAuthentication(localStorage.getItem("token"))
       setUserData(respone)
-      console.log(respone)
     }
     fetchUserData()
   }, [])

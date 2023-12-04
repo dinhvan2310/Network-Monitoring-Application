@@ -1,21 +1,159 @@
-import { Button, Modal, Space, Table, Tag, Tooltip, TreeSelect } from "antd";
-import { AppstoreAddOutlined } from "@ant-design/icons";
+import {
+  Button,
+  Form,
+  Input,
+  Modal,
+  Select,
+  Space,
+  Table,
+  Tag,
+  Tooltip,
+  TreeSelect,
+} from "antd";
+import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
+import Highlighter from 'react-highlight-words';
 import JSAlert from "js-alert";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import hostService from "services/hostService";
 import templateService from "services/templateService";
+import itemService from "services/itemService";
+import { Link } from "react-router-dom";
 
 function Hosts() {
+  //
+  const [searchText, setSearchText] = useState('');
+  const [searchedColumn, setSearchedColumn] = useState('');
+  const searchInput = useRef(null);
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+  };
+  const handleReset = (clearFilters) => {
+    clearFilters();
+    setSearchText('');
+  };
+  const getColumnSearchProps = (dataIndex) => ({
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
+      <div
+        style={{
+          padding: 8,
+        }}
+        onKeyDown={(e) => e.stopPropagation()}
+      >
+        <Input
+          ref={searchInput}
+          placeholder={`Search ${dataIndex}`}
+          value={selectedKeys[0]}
+          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+          style={{
+            marginBottom: 8,
+            display: 'block',
+          }}
+        />
+        <Space>
+          <Button
+            type="primary"
+            onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
+            icon={<SearchOutlined />}
+            size="small"
+            style={{
+              width: 90,
+            }}
+          >
+            Search
+          </Button>
+          <Button
+            onClick={() => clearFilters && handleReset(clearFilters)}
+            size="small"
+            style={{
+              width: 90,
+            }}
+          >
+            Reset
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              confirm({
+                closeDropdown: false,
+              });
+              setSearchText(selectedKeys[0]);
+              setSearchedColumn(dataIndex);
+            }}
+          >
+            Filter
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              close();
+            }}
+          >
+            close
+          </Button>
+        </Space>
+      </div>
+    ),
+    filterIcon: (filtered) => (
+      <SearchOutlined
+        style={{
+          color: filtered ? '#1677ff' : undefined,
+        }}
+      />
+    ),
+    onFilter: (value, record) =>
+      record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
+    onFilterDropdownOpenChange: (visible) => {
+      if (visible) {
+        setTimeout(() => searchInput.current?.select(), 100);
+      }
+    },
+    render: (text) =>
+      searchedColumn === dataIndex ? (
+        <Highlighter
+          highlightStyle={{
+            backgroundColor: '#ffc069',
+            padding: 0,
+          }}
+          searchWords={[searchText]}
+          autoEscape
+          textToHighlight={text ? text.toString() : ''}
+        />
+      ) : (
+        text
+      ),
+  });
+
   const columns = [
     {
       title: "Name",
       dataIndex: "name",
       key: "name",
+      ...getColumnSearchProps('name'),
     },
     {
       title: "Interfaces",
       dataIndex: "interfaces",
       key: "interfaces",
+    },
+    {
+      title: "Item",
+      key: "item",
+      render: ({item}) => {
+        if(!item) return (
+          <Tag color="#2ecc71">0</Tag>
+        )
+        return (
+          <Space>
+            <Tag color="#2ecc71">{item.result.length}</Tag>
+            {item.result.length > 0 ? (<Link to={`/dataCollection/items?hostid=${item.result[0].hostid}`}>{"Item"}</Link>) : (null)}
+          </Space>
+        )
+      }
     },
     {
       title: "Status",
@@ -63,10 +201,12 @@ function Hosts() {
     },
     {
       title: () => (
-        <Tooltip title="Add User">
+        <Tooltip title="Add Host">
           <Button
-            icon={<AppstoreAddOutlined />}
-            onClick={() => {
+            icon={<PlusOutlined />}
+            onClick={async () => {
+              await loadTreeData();
+              await loadTreeDataHostGroup();
               setIsModalAddHostShown(true);
             }}
           ></Button>
@@ -75,13 +215,80 @@ function Hosts() {
       dataIndex: "action",
     },
   ];
+
+  const validateIPAddress = (_, value, callback) => {
+    // Regular expression pattern to match IPv4 address
+    const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
+
+    if (value && !ipRegex.test(value)) {
+      callback("Please enter a valid IPv4 address!");
+    } else {
+      callback();
+    }
+  };
+
+  const loadTreeData = async () => {
+    const templateGroups = await templateService.getTemplateGroups();
+    const treeDataTemp = templateGroups.result.map(async (templateGroup) => {
+      const templates = await templateService.getTemplatesByTemplateGroup(
+        templateGroup.groupid
+      );
+      return {
+        disabled: true,
+        title: templateGroup.name,
+        value: templateGroup.groupid,
+        key: templateGroup.groupid,
+        children: templates.result.map((template) => {
+          return {
+            isLeaf: true,
+            title: template.name,
+            key: template.templateid,
+            value: template.templateid,
+          };
+        }),
+      };
+    });
+    setTreeData(await Promise.all(treeDataTemp));
+  };
+
+  const [treeDataHostGroup, setTreeDataHostGroup] = useState([]);
+  const loadTreeDataHostGroup = async () => {
+    const hostGroups = await hostService.getHostGroups();
+    const treeDataTemp = hostGroups.result.map((hostGroup) => {
+      return {
+        title: hostGroup.name,
+        key: hostGroup.groupid,
+        value: hostGroup.groupid,
+      };
+    });
+    setTreeDataHostGroup(treeDataTemp);
+  };
+
+  const [version, setVersion] = useState(null);
+  const [reLoad, setReLoad] = useState(false);
+  const [value, setValue] = useState();
+
+  useEffect(() => {
+    setReLoad((pre) => !pre);
+  }, [version]);
+
   const [dataSource, setDataSource] = useState([]);
+  const [selectedHost, setSelectedHost] = useState(null);
   useEffect(() => {
     const fetchDevices = async () => {
       setLoading(true);
+
+      // const template3 = await templateService.getTemplatesByHost(10603)
+      // console.log(template3)
+      // const template2 = await templateService.getTemplatesByHost(10602)
+      // console.log(template2)
+
       const hosts = await hostService.getHosts();
+      console.log(hosts);
+
       const hostInterfaces = hosts.result.map(async (host) => {
         const hostInterfaces = await hostService.getHostInterfaces(host.hostid);
+        console.log(await itemService.getItemsByHost(host.hostid))
         return {
           key: host.hostid,
           name: host.name,
@@ -90,6 +297,7 @@ function Hosts() {
               " : " +
               hostInterfaces.result[0].port
             : "",
+            item: await itemService.getItemsByHost(host.hostid),
           status: host.status,
           hostInterfaces: hostInterfaces,
           type: hostInterfaces.result[0] ? hostInterfaces.result[0].type : "",
@@ -116,7 +324,7 @@ function Hosts() {
     onChange: onSelectChange,
     selections: [Table.SELECTION_ALL],
   };
-  const [value, setValue] = useState();
+
   const onChange = (newValue) => {
     console.log(newValue);
     setValue(newValue);
@@ -125,90 +333,434 @@ function Hosts() {
   return (
     <>
       <Modal
+        title="Add host"
         open={isModalAddHostShown}
         onCancel={() => setIsModalAddHostShown(false)}
-        onOk={async () => {
-          const response = await hostService.createHost({
-            host: "test",
-            interfaces: [
-              {
-                type: 2,
-                main: 1,
-                useip: 1,
-                ip: "192.168.137.3",
-                dns: "",
-                port: "161",
-                details: {
-                  version: 2,
-                  bulk: 1,
-                  community: "public",
-                },
-              },
-            ],
-            groups: [
-              {
-                groupid: "2",
-              },
-            ],
-            templates: [
-              {
-                templateid: "10001",
-              },
-            ],
-          });
-          if(response.error){
-            JSAlert.alert(response.error.data, response.error.message);
-          }else{
-            JSAlert.alert("Create host successfully");
-          }
-          setIsModalAddHostShown(false);
-        }}
+        footer={null}
+        // onOk={async () => {
+
+        // setIsModalAddHostShown(false);
+        // }}
       >
-        <h1>Modal add host</h1>
+        <Form
+          name="addhost"
+          labelCol={{ span: 6 }}
+          wrapperCol={{ span: 16 }}
+          style={{ maxWidth: 800 }}
+          initialValues={{}}
+          onFinish={async (values) => {
+            let response;
+            if (values.templateid) {
+              response = await hostService.createHost({
+                host: `${values.host}`,
+                interfaces: [
+                  {
+                    type: 2,
+                    main: 1,
+                    useip: 1,
+                    ip: `${values.ip}`,
+                    dns: "",
+                    port: `${values.port}`,
+                    details: {
+                      version: `${values.version}`,
+                      bulk: 1,
+                      community: `${values.community}`,
+                    },
+                  },
+                ],
+                groups: [
+                  {
+                    groupid: `${values.groupid}`,
+                  },
+                ],
+                templates: [
+                  {
+                    templateid: `${values.templateid}`,
+                  },
+                ],
+              });
+            } else {
+              response = await hostService.createHost({
+                host: `${values.host}`,
+                interfaces: [
+                  {
+                    type: 2,
+                    main: 1,
+                    useip: 1,
+                    ip: `${values.ip}`,
+                    dns: "",
+                    port: `${values.port}`,
+                    details: {
+                      version: `${values.version}`,
+                      bulk: 1,
+                      community: `${values.community}`,
+                    },
+                  },
+                ],
+                groups: [
+                  {
+                    groupid: `${values.groupid}`,
+                  },
+                ],
+              });
+            }
+            if (response.error) {
+              JSAlert.alert(response.error.data, response.error.message);
+            } else {
+              JSAlert.alert("Create host successfully");
+              setDataSource([
+                ...dataSource,
+                {
+                  key: response.result.hostids[0],
+                  name: values.host,
+                  interfaces: values.ip + " : " + values.port,
+                  status: 1,
+                  item: await itemService.getItemsByHost(response.result.hostids[0]),
+                  hostInterfaces: {
+                    result: [
+                      {
+                        available: 0,
+                      },
+                    ],
+                  },
+                  type: "2",
+                },
+              ]);
+              setIsModalAddHostShown(false);
+            }
+          }}
+          autoComplete="off"
+        >
+          <Form.Item
+            label="Host name"
+            name={"host"}
+            rules={[
+              {
+                required: true,
+                message: "Please input host name",
+              },
+            ]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item label="Template" name={"templateid"}>
+            <TreeSelect
+              showSearch
+              style={{ width: "100%" }}
+              value={value}
+              dropdownStyle={{ maxHeight: 1000, overflow: "auto" }}
+              placeholder="Please select"
+              allowClear
+              // treeDefaultExpandAll
+              onChange={onChange}
+              treeData={treeData}
+            />
+          </Form.Item>
+          <Form.Item
+            label="Host group"
+            name={"groupid"}
+            rules={[
+              {
+                required: true,
+                message: "Please input host group",
+              },
+            ]}
+          >
+            <TreeSelect
+              showSearch
+              style={{ width: "100%" }}
+              value={value}
+              dropdownStyle={{ maxHeight: 1000, overflow: "auto" }}
+              placeholder="Please select"
+              allowClear
+              // treeDefaultExpandAll
+              onChange={onChange}
+              treeData={treeDataHostGroup}
+            />
+          </Form.Item>
+          <Form.Item
+            label="Ip address"
+            name={"ip"}
+            rules={[
+              {
+                required: true,
+                message: "Please input ip address",
+              },
+              {
+                validator: validateIPAddress,
+                message: "Please input valid ip address",
+              },
+            ]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            label="Port"
+            name={"port"}
+            initialValue={"161"}
+            rules={[
+              {
+                required: true,
+                message: "Please input port",
+              },
+            ]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            label="Snmp version"
+            name={"version"}
+            rules={[
+              {
+                required: true,
+                message: "Please input snmp version",
+              },
+            ]}
+          >
+            <Select
+              // defaultValue={2}
+              style={{
+                width: 120,
+              }}
+              onChange={(value) => {
+                setVersion(value);
+              }}
+              options={[
+                {
+                  value: 2,
+                  label: "SMNPv2",
+                },
+                {
+                  value: 3,
+                  label: "SMNPv3",
+                },
+              ]}
+            />
+          </Form.Item>
+          {version === 2 ? (
+            <Form.Item
+              label="Community"
+              name={"community"}
+              initialValue={"public"}
+              rules={[
+                {
+                  required: true,
+                  message: "Please input snmp community",
+                },
+              ]}
+            >
+              <Input />
+            </Form.Item>
+          ) : version === 3 ? (
+            <h1>Version3</h1>
+          ) : null}
+
+          <Button type="primary" htmlType="submit">
+            Submit
+          </Button>
+        </Form>
       </Modal>
       <Modal
         open={isModalShown}
         onCancel={() => setIsModalShown(false)}
-        onOk={async () => {
-          const host = await hostService.getHost(selectedRowKeys[0]);
-          console.log(selectedRowKeys);
-          console.log(host);
-          const templates = await templateService.getTemplatesByHost(
-            selectedRowKeys[0]
-          );
-          const template = await templateService.getTemplatesByHost(
-            selectedRowKeys[0]
-          );
-          console.log(template);
-          const templateids = template.result.map(
-            (template) => template.templateid
-          );
-          console.log(templateids);
-          console.log(value);
-          console.log([...templateids, value]);
-          const response = await hostService.updateHostTemplates(
-            selectedRowKeys[0],
-            [...templateids, value]
-          );
-          if (response.error) {
-            JSAlert.alert(response.error.data, response.error.message);
-          } else {
-          }
-          setIsModalShown(false);
-          setSelectedRowKeys([]);
-        }}
+        footer={null}
+        destroyOnClose={true}
       >
-        <TreeSelect
-          showSearch
-          style={{ width: "100%" }}
-          value={value}
-          dropdownStyle={{ maxHeight: 1000, overflow: "auto" }}
-          placeholder="Please select"
-          allowClear
-          // treeDefaultExpandAll
-          onChange={onChange}
-          treeData={treeData}
-        />
+        <Form
+          name="editHost"
+          labelCol={{ span: 6 }}
+          wrapperCol={{ span: 16 }}
+          style={{ maxWidth: 800 }}
+          onFinish={async (values) => {
+            console.log(values);
+            let host = {
+              hostid: `${selectedHost.result[0].hostid}`,
+              host: `${values.host}`,
+            }
+            if(values.templateid){
+              host.templates = [
+                {
+                  templateid: `${values.templateid}`,
+                },
+              ];
+            }
+            if(values.groupid){
+              host.groups = values.groupid.map(id => {
+                return {
+                  groupid: id
+                }
+              })
+                
+              ;
+            }
+            console.log(host)
+
+            const response = await hostService.updateHost(host);
+            if(response.error){
+              JSAlert.alert(response.error.data, response.error.message);
+            }else{
+              JSAlert.alert("Update host successfully");
+              setDataSource(
+                dataSource.map((host) => {
+                  if (host.key === selectedHost.result[0].hostid) {
+                    host.name = values.host;
+                  }
+                  return host;
+                })
+              );
+              setIsModalShown(false);
+            }
+
+          }}
+          autoComplete="off"
+        >
+          <Form.Item
+            initialValue={selectedHost ? selectedHost.result[0].host : null}
+            label="Host name"
+            name={"host"}
+            rules={[
+              {
+                required: true,
+                message: "Please input host name",
+              },
+            ]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item label="Template" name={"templateid"}>
+            <TreeSelect
+              showSearch
+              multiple
+              style={{ width: "100%" }}
+              defaultValue={selectedHost ? selectedHost.templates.result.map((template) => {
+                return template.templateid
+              }) : []}        
+              dropdownStyle={{ maxHeight: 1000, overflow: "auto" }}
+              placeholder="Please select"
+              allowClear
+              // treeDefaultExpandAll
+              onChange={onChange}
+              treeData={treeData}
+            />
+          </Form.Item>
+          <Form.Item
+            label="Host group"
+            name={"groupid"}
+            // rules={[
+            //   {
+            //     required: true,
+            //     message: "Please input host group",
+            //   },
+            // ]}
+          >
+            <Select
+              mode="multiple"
+              style={{
+                width: "100%",
+              }}
+              placeholder="Please select"
+              defaultValue={
+                selectedHost
+                  ? selectedHost.result[0].hostgroups.map((group) => {
+                      return {
+                        value: group.groupid,
+                        label: group.name,
+                      };
+                    })
+                  : []
+              }
+              onChange={(value) => {
+                console.log(`selected ${value}`);
+              }}
+              options={treeDataHostGroup.map((group) => {
+                return {
+                  value: group.value,
+                  label: group.title,
+                }
+              })}
+            />
+          </Form.Item>
+          {/* <Form.Item
+            label="Ip address"
+            name={"ip"}
+            rules={[
+              {
+                required: true,
+                message: "Please input ip address",
+              },
+              {
+                validator: validateIPAddress,
+                message: "Please input valid ip address",
+              },
+            ]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            label="Port"
+            name={"port"}
+            initialValue={"161"}
+            rules={[
+              {
+                required: true,
+                message: "Please input port",
+              },
+            ]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            label="Snmp version"
+            name={"version"}
+            rules={[
+              {
+                required: true,
+                message: "Please input snmp version",
+              },
+            ]}
+          >
+            <Select
+              // defaultValue={2}
+              style={{
+                width: 120,
+              }}
+              onChange={(value) => {
+                setVersion(value);
+              }}
+              options={[
+                {
+                  value: 2,
+                  label: "SMNPv2",
+                },
+                {
+                  value: 3,
+                  label: "SMNPv3",
+                },
+              ]}
+            />
+          </Form.Item>
+          {version === 2 ? (
+            <Form.Item
+              label="Community"
+              name={"community"}
+              initialValue={"public"}
+              rules={[
+                {
+                  required: true,
+                  message: "Please input snmp community",
+                },
+              ]}
+            >
+              <Input />
+            </Form.Item>
+          ) : version === 3 ? (
+            <h1>Version3</h1>
+          ) : null} */}
+
+          <Button type="primary" htmlType="submit">
+            Submit
+          </Button>
+        </Form>
       </Modal>
       <Table
         title={() => "Hosts"}
@@ -278,11 +830,9 @@ function Hosts() {
               if (response.error) {
                 JSAlert.alert(response.error.data, response.error.message);
               } else {
-                setDataSource(
-                  dataSource.filter((host) => {
-                    return host.key !== key;
-                  })
-                );
+                setDataSource((preData) => {
+                  return preData.filter((host) => host.key !== key);
+                });
               }
             });
             setSelectedRowKeys([]);
@@ -291,9 +841,8 @@ function Hosts() {
           Delete
         </Button>
         <Button
-          type="default"
+          type="primary"
           ghost
-          danger
           disabled={selectedRowKeys.length > 0 ? false : true}
           onClick={async () => {
             if (selectedRowKeys.length > 1) {
@@ -304,37 +853,26 @@ function Hosts() {
               JSAlert.alert("Please select a host to edit");
               return;
             }
-            const templateGroups = await templateService.getTemplateGroups();
-            console.log(templateGroups);
-            const treeDataTemp = templateGroups.result.map(
-              async (templateGroup) => {
-                const templates =
-                  await templateService.getTemplatesByTemplateGroup(
-                    templateGroup.groupid
-                  );
-                console.log(templates);
-                return {
-                  disabled: true,
-                  title: templateGroup.name,
-                  value: templateGroup.groupid,
-                  children: templates.result.map((template) => {
-                    return {
-                      isLeaf: true,
-                      title: template.name,
-                      value: template.templateid,
-                    };
-                  }),
-                };
-              }
+            await loadTreeData();
+            let hostSelected = await hostService.getHost(selectedRowKeys[0]);
+            hostSelected.templates = await templateService.getTemplatesByHost(
+              selectedRowKeys[0]
             );
-            console.log(await Promise.all(treeDataTemp));
-            setTreeData(await Promise.all(treeDataTemp));
+            console.log(hostSelected);
+            setSelectedHost(hostSelected);
+            setValue(hostSelected.templates.result.map((template) => {
+              return template.templateid
+            }))
 
+            
+            await loadTreeDataHostGroup();
+            await loadTreeData();
             setIsModalShown(true);
           }}
         >
           Edit
         </Button>
+        
       </Space>
     </>
   );

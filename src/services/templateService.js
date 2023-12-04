@@ -12,6 +12,17 @@ const templateService = {
             "id": 1
         })
     },
+    getTemplateById: async (templateid) => {
+        return httpRequests.post('', {
+            "jsonrpc": "2.0",
+            "method": "template.get",
+            "params": {
+                "templateids": `${templateid}`
+            },
+            "auth": `${localStorage.getItem("token")}`,
+            "id": 1
+        })
+    },
     getTemplatesByHost: async (hostid) => {
         return httpRequests.post('', {
             "jsonrpc": "2.0",
@@ -67,7 +78,50 @@ const templateService = {
             "id": 1
         })
     },
-
+    createTempalte: async (template) => {
+        return httpRequests.post('', {
+            "jsonrpc": "2.0",
+            "method": "template.create",
+            "params": {
+                "host": `${template.host}`,
+                "groups": template.groups,
+            },
+            "auth": `${localStorage.getItem("token")}`,
+            "id": 1
+        })
+    },
+    updateTemplateGroup: async (groupid, name) => {
+        return httpRequests.post('', {
+            "jsonrpc": "2.0",
+            "method": "templategroup.update",
+            "params": {
+                "groupid": `${groupid}`,
+                "name": `${name}`
+            },
+            "auth": `${localStorage.getItem("token")}`,
+            "id": 1
+        })
+    },
+    addTemplate: async(host,groupid,templateid,description) =>{
+        return httpRequests.post('',{
+            "jsonrpc" : "2.0",
+            "method":"template.create",
+            "params":{
+                "host":`${host}`,
+                "groups":{
+                    "groupid":`${groupid}`,
+                },
+                "templates":[
+                    {
+                        "templateid":`${templateid}`,
+                    }
+                ],
+                "description":`${description}`,
+        },
+           "auth":`${localStorage.getItem("token")}`,
+            "id": 1
+        })
+    },
 }
 
 export default templateService

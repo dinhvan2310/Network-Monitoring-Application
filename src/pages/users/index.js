@@ -13,7 +13,7 @@ import {
   message,
   Popconfirm,
 } from "antd";
-import { UserAddOutlined } from "@ant-design/icons";
+import { PlusOutlined } from "@ant-design/icons";
 import userService from "services/userService";
 import JSAlert from "js-alert";
 
@@ -41,7 +41,7 @@ function Users() {
       title: () => (
         <Tooltip title="Add User">
           <Button
-            icon={<UserAddOutlined />}
+            icon={<PlusOutlined />}
             onClick={() => {
               setIsModalOpen(true);
             }}
@@ -137,7 +137,7 @@ function Users() {
                   username: values.username,
                   name: values.name,
                   lastname: values.lastname,
-                  userrole: values.userrole===1? "User role" : "Super admin role",
+                  userrole: values.userrole==='1'? "User role" : "Super admin role",
                 },
               ]);
               setIsModalOpen(false);
@@ -266,7 +266,9 @@ function Users() {
             if (response.error) {
               JSAlert.alert(response.error.data, response.error.message);
             } else {
-              setUserData(userData.filter((user) => user.key !== key));
+              setUserData(preUserData => {
+                return preUserData.filter(user => user.key !== key)
+              });
             }
           });
           setSelectedRowKeys([]);

@@ -1,9 +1,12 @@
-import { Button, Space, Table, Tag } from "antd";
+import { Button, Space, Table, Tag, List, Typography } from "antd";
 import JSAlert from "js-alert";
 import { useEffect, useState } from "react";
-import { Link, useLocation, useParams } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import hostService from "services/hostService";
 import itemService from "services/itemService";
+import ItemGraph from "../graph";
+import ItemLineChart from "components/ItemLineChart";
+import ItemListChart from "components/ItemListChart";
 
 function LatestData() {
   const columns = [
@@ -36,6 +39,21 @@ function LatestData() {
       textWrap: "word-break",
       ellipsis: true,
     },
+    {
+      title: "Graph",
+      dataIndex: "history",
+      key: "history",
+      render: (history, {itemid, value_type}) => {
+        if (history !== "0") {
+          console.log(itemid);
+          if(value_type === "0" || value_type === "3") {
+            return <Link to={`/monitoring/graph?itemid=${itemid}`}>Graph</Link>
+          } else {
+            return <Link to={`/monitoring/graph?itemid=${itemid}`}>Graph</Link>
+          }
+        }
+      },
+    }
   ];
 
   const queryString = new URLSearchParams(useLocation().search);
@@ -47,7 +65,7 @@ function LatestData() {
 
   useEffect(() => {
     setHostid(queryString.get("hostid"));
-  }, [queryString])
+  }, [queryString]);
 
   useEffect(() => {
     const fetchDevices = async () => {
@@ -55,19 +73,19 @@ function LatestData() {
       let response = null;
       if (hostid === "all") {
         const hosts = await hostService.getHosts();
-        console.log(hosts)
+        console.log(hosts);
         const hostidsPromise = hosts.result.map(async (host) => {
           return host.hostid;
-        })
-        const hostids = await Promise.all(hostidsPromise)
-        console.log(hostids)
+        });
+        const hostids = await Promise.all(hostidsPromise);
+        console.log(hostids);
         response = await itemService.getItemsByHost(hostids);
       } else {
         response = await itemService.getItemsByHost(hostid);
       }
       console.log(response);
       const data = response.result.map(async (item) => {
-        const timestamp = item.lastclock
+        const timestamp = item.lastclock;
         const date = new Date(timestamp * 1000); // Phải nhân với 1000 vì JavaScript sử dụng milliseconds cho timestamp
         const year = date.getFullYear();
         const month = date.getMonth() + 1; // Tháng trong JavaScript bắt đầu từ 0
@@ -77,21 +95,26 @@ function LatestData() {
         const seconds = date.getSeconds();
         const formattedTime = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
 
-        let change = ""
-        let value = item.lastvalue
-        if(item.value_type === "0") {
-            change = value - item.prevvalue
-            change = change.toFixed(2) + " " + item.units
+        let change = "";
+        let value = item.lastvalue;
+        if (item.value_type === "0") {
+          change = value - item.prevvalue;
+          change = change.toFixed(2) + " " + item.units;
         }
 
-
         return {
+          ...item,
           key: item.itemid,
+          itemid: item.itemid,
           host: (await hostService.getHostName(item.hostid)).result[0].host,
           name: item.name,
           lastcheck: formattedTime,
-          lastvalue:  value + " " + item.units,
+          lastvalue: value + " " + item.units,
           change: change,
+          value_type: item.value_type,
+          history: item.history,
+          delay: item.delay,
+          units: item.units,
         };
       });
       setDataSource(await Promise.all(data));
@@ -119,6 +142,20 @@ function LatestData() {
         columns={columns}
         dataSource={dataSource}
         loading={loading}
+        expandable={{
+          expandedRowRender: (item) => {
+            console.log(item)
+            if(item.value_type === "0" || item.value_type === "3") {
+              return <ItemLineChart item={item} />
+            } else {
+              return <ItemListChart  item={item}/>
+            }
+          },
+          rowExpandable: (item) => item.history != "0",
+          onExpand: async (expanded, record) => {
+
+          },
+        }}
       />
       <Space>
         <Button
