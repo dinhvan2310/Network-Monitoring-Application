@@ -47,7 +47,7 @@ const userService = {
         "id": 1
     });
   },
-  addUser: async (username, password, name, lastname, autologin, autologout, refresh, rowperpage, roleid) => {
+  addUser: async (username, password, name, lastname, roleid) => {
     return httpRequests.post('', {
       "jsonrpc": "2.0",
       "method": "user.create",
@@ -56,15 +56,45 @@ const userService = {
           "passwd": `${password}`,
           "name": `${name}`,
           "surname": `${lastname}`,
-          "autologin": autologin? 1 : 0,
-          "autologout": autologout? `${autologout}` : 0,
-          "refresh": `${refresh}`,
-          "rows_per_page": `${rowperpage}`,
+          // "autologin": autologin? 1 : 0,
+          // "autologout": autologout? `${autologout}` : 0,
+          // "refresh": `${refresh}`,
+          // "rows_per_page": `${rowperpage}`,
           "roleid": `${roleid}`
       },
       "auth": `${localStorage.getItem("token")}`,
       "id": 1
   })
+  },
+  updateUser: async (user) => {
+    return httpRequests.post('', {
+      "jsonrpc": "2.0",
+      "method": "user.update",
+      "params": {
+          "userid": `${user.userid}`,
+          "name": `${user.name}`,
+          "surname": `${user.surname}`,
+          // "autologin": `${user.autologin}`,
+          // "autologout": `${user.autologout}`,
+          // "refresh": `${user.refresh}`,
+          // "rows_per_page": `${user.rows_per_page}`,
+          "roleid": `${user.roleid}`
+      },
+      "auth": `${localStorage.getItem("token")}`,
+      "id": 1
+    })
+  },
+  updateUserPassword: async (userid, password) => {
+    return httpRequests.post('', {
+      "jsonrpc": "2.0",
+      "method": "user.update",
+      "params": {
+          "userid": `${userid}`,
+          "passwd": `${password}`
+      },
+      "auth": `${localStorage.getItem("token")}`,
+      "id": 1
+    })
   },
   deleteUser: async (userid) => {
     return httpRequests.post('', {

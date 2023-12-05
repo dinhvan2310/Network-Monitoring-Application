@@ -1,4 +1,4 @@
-import { Button, Space, Table, Tag, List, Typography } from "antd";
+import { Button, Space, Table, Tag, List, Typography, notification } from "antd";
 import JSAlert from "js-alert";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
@@ -62,6 +62,15 @@ function LatestData() {
   const [hostid, setHostid] = useState(() => {
     return queryString.get("hostid");
   });
+
+  const [api, contextHolder] = notification.useNotification();
+  const openNotificationWithIcon = (type) => {
+    api[type]({
+      message: 'Notification Title',
+      description:
+        'This is the content of the notification. This is the content of the notification. This is the content of the notification.',
+    });
+  };
 
   useEffect(() => {
     setHostid(queryString.get("hostid"));
