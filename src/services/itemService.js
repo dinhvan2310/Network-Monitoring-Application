@@ -7,7 +7,7 @@ const itemService = {
             "method": "item.get",
             "params": {
                 "filter": {
-                    "type": 20,
+                    // "type": [20, 5],
                 }
             },
             "auth": `${localStorage.getItem("token")}`,
@@ -23,7 +23,7 @@ const itemService = {
                     "name": `${name}`,
                 },
                 "filter": {
-                    "type": 20,
+                    // "type": [20, 5],
                 }
             },
             "auth": `${localStorage.getItem("token")}`,
@@ -37,7 +37,7 @@ const itemService = {
             "params": {
                 "itemids": `${itemid}`,
                 "filter": {
-                    "type": 20,
+                    // "type": [20, 5],
                 }
             },
             "auth": `${localStorage.getItem("token")}`,
@@ -51,7 +51,7 @@ const itemService = {
             "params": {
                 "hostids": Array.isArray(hostid)? [...hostid] :`${hostid}`,
                 "filter": {
-                    "type": 20,
+                    // "type": [20, 5],
                 }
             },
             "auth": `${localStorage.getItem("token")}`,
@@ -65,7 +65,7 @@ const itemService = {
             "params": {
                 "templateids": `${templateid}`,
                 "filter": {
-                    "type": 20,
+                    // "type": [20, 5],
                 }
             },
             "auth": `${localStorage.getItem("token")}`,

@@ -12,14 +12,24 @@ import {
   Radio,
   message,
   Popconfirm,
+  Drawer,
+  Col,
+  Row,
+  Select,
+  DatePicker,
+  notification,
+  Switch,
 } from "antd";
+
 import { PlusOutlined } from "@ant-design/icons";
 import userService from "services/userService";
 import JSAlert from "js-alert";
 
 function Users() {
-  const [userData, setUserData] = useState([]);
+  const [reload, setReload] = useState(false);
 
+  const { Option } = Select;
+  const [userData, setUserData] = useState([]);
   const columns = [
     {
       title: "Username",
@@ -52,6 +62,16 @@ function Users() {
     },
   ];
 
+  const [open, setOpen] = useState(false);
+  const showDrawer = () => {
+    setOpen(true);
+  };
+  const onClose = () => {
+    setOpen(false);
+  };
+
+  const [isChangePassword, setIsChangePassword] = useState(false);
+
   useEffect(() => {
     const fetchUsers = async () => {
       // console.log(await userService.checkAuthentication(localStorage.getItem("token")));
@@ -60,6 +80,7 @@ function Users() {
       const promises = response.result.map(async (user) => {
         const role = await userService.getRole(user.roleid);
         return {
+          ...user,
           key: user.userid,
           username: user.username,
           name: user.name,
@@ -72,7 +93,7 @@ function Users() {
       console.log(users);
     };
     fetchUsers();
-  }, []);
+  }, [reload]);
 
   const [autologin, setAutologin] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -86,8 +107,233 @@ function Users() {
     onChange: onSelectChange,
     selections: [Table.SELECTION_ALL],
   };
+
+  // const [selectUser, setSelectUser] = useState({});
+
   return (
     <>
+      <>
+        <Drawer
+          title="Edit User"
+          width={720}
+          onClose={onClose}
+          open={open}
+          styles={{
+            body: {
+              paddingBottom: 80,
+            },
+          }}
+          destroyOnClose={true}
+        >
+          <Form
+            name="edituser"
+            labelCol={{
+              span: 8,
+            }}
+            wrapperCol={{
+              span: 16,
+            }}
+            style={{
+              maxWidth: 800,
+            }}
+            initialValues={{
+              remember: true,
+            }}
+            onFinish={async (values) => {
+              values.userid = selectedRowKeys[0]
+              console.log(values);
+              const response = await userService.updateUser(values)
+
+              if(values.changepassword){
+                const response = await userService.updateUserPassword(values.userid, values.password)
+                console.log(response)
+                if(response.error){
+                  JSAlert.alert(response.error.data, response.error.message);
+                  return;
+                }
+              }
+
+              console.log(response)
+              if(response.error){
+                JSAlert.alert(response.error.data, response.error.message);
+                return;
+              }else{
+                setReload(!reload)
+              }
+              setOpen(false);
+            }}
+            onFinishFailed={null}
+            autoComplete="off"
+          >
+            <Form.Item
+              label="Username"
+              name="username"
+              rules={[
+                {
+                  required: true,
+                  message: "Please input your username!",
+                },
+              ]}
+              initialValue={
+                userData.filter((user) => user.userid === selectedRowKeys[0])[0]
+                  ?.username
+              }
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              label="User role"
+              name="roleid"
+              rules={[
+                {
+                  required: true,
+                  message: "Please input your user role!",
+                },
+              ]}
+              initialValue={
+                userData.filter((user) => user.userid === selectedRowKeys[0])[0]
+                  ?.roleid
+              }
+            >
+              <Radio.Group>
+                <Radio.Button value="3">Admin</Radio.Button>
+                <Radio.Button value="1">User</Radio.Button>
+              </Radio.Group>
+            </Form.Item>
+            <Form.Item
+              label="Name"
+              name="name"
+              rules={[{}]}
+              initialValue={
+                userData.filter((user) => user.userid === selectedRowKeys[0])[0]
+                  ?.name
+              }
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              label="Lastname"
+              name="surname"
+              rules={[{}]}
+              initialValue={
+                userData.filter((user) => user.userid === selectedRowKeys[0])[0]
+                  ?.surname
+              }
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              label="Change Password"
+              name="changepassword"
+              initialValue={isChangePassword}
+            >
+              <Switch
+                onChange={(checked) => {
+                  console.log(checked);
+                  setIsChangePassword(checked);
+                }}
+              />
+            </Form.Item>
+            {isChangePassword && (
+              <>
+                <Form.Item
+                  name="password"
+                  label="Password"
+                  rules={[
+                    { required: true, message: "Please enter your password" },
+                  ]}
+                >
+                  <Input.Password placeholder="Enter your password" />
+                </Form.Item>
+                <Form.Item
+                  name="confirmPassword"
+                  label="Confirm Password"
+                  dependencies={["password"]}
+                  rules={[
+                    { required: true, message: "Please confirm your password" },
+                    ({ getFieldValue }) => ({
+                      validator(_, value) {
+                        if (!value || getFieldValue("password") === value) {
+                          return Promise.resolve();
+                        }
+                        return Promise.reject("Passwords do not match");
+                      },
+                    }),
+                  ]}
+                >
+                  <Input.Password placeholder="Confirm your password" />
+                </Form.Item>
+              </>
+            )}
+            {/* <Form.Item label="Auto Login" name="autologin"
+              initialValue={setAutologin(userData.filter((user) => user.userid === selectedRowKeys[0])[0]?.autologin)}
+            >
+              <Checkbox
+                // checked={autologin}
+                checked={autologin}
+                onChange={(e) => {
+                  setAutologin(e.target.checked);
+                }}
+              />
+            </Form.Item> */}
+            {/* <Form.Item label="Auto Logout" name="autologout"
+              initialValue={userData.filter((user) => user.userid === selectedRowKeys[0])[0]?.autologout}
+              rules={[
+                {
+                  pattern: /^(\d+)(s|m|h|d)|0$/,
+                  message: "Please input auto logout as number with s|m|h|d",
+                }
+              ]}
+            >
+              <Input />
+            </Form.Item> */}
+            {/* <Form.Item
+              label="Refresh"
+              name="refresh"
+              rules={[
+                {
+                  required: true,
+                  message: "Please input your value!",
+                },
+                {
+                  pattern: /^(\d+)(s|m|h)$/,
+                  message: "Please input refresh as number with s|m|h",
+                }
+              ]}
+              initialValue={userData.filter((user) => user.userid === selectedRowKeys[0])[0]?.refresh}
+            >
+              <Input />
+            </Form.Item> */}
+            {/* <Form.Item
+              label="Row per page"
+              name="rowperpage"
+              rules={[
+                {
+                  required: true,
+                  message: "Please input your value!",
+                },
+                {
+                  pattern: /^(\d+)$/,
+                  message: "Please input row per page as number",
+                }
+              ]}
+              initialValue={userData.filter((user) => user.userid === selectedRowKeys[0])[0]?.rows_per_page}
+            >
+              <Input />
+            </Form.Item> */}
+            <Form.Item>
+              <Space>
+                <Button type="primary" htmlType="submit">
+                  Update
+                </Button>
+                <Button type="default" htmlType="reset">
+                  Reset
+                </Button>
+              </Space>
+            </Form.Item>
+          </Form>
+        </Drawer>
+      </>
       <Modal
         title="Add User"
         open={isModalOpen}
@@ -96,6 +342,7 @@ function Users() {
         onCancel={() => {
           setIsModalOpen(false);
         }}
+        destroyOnClose={true}
       >
         <Form
           name="adduser"
@@ -119,27 +366,18 @@ function Users() {
               values.password,
               values.name,
               values.lastname,
-              autologin,
-              values.autologout,
-              values.refresh,
-              values.rowperpage,
+              // autologin,
+              // values.autologout,
+              // values.refresh,
+              // values.rowperpage,
               values.userrole
             );
-            console.log(response)
-            if(response.error) {
+            console.log(response);
+            if (response.error) {
               JSAlert.alert(response.error.data, response.error.message);
               return;
-            } else{
-              setUserData([
-                ...userData,
-                {
-                  key: response.result.userids[0],
-                  username: values.username,
-                  name: values.name,
-                  lastname: values.lastname,
-                  userrole: values.userrole==='1'? "User role" : "Super admin role",
-                },
-              ]);
+            } else {
+              setReload(!reload);
               setIsModalOpen(false);
             }
           }}
@@ -158,7 +396,9 @@ function Users() {
           >
             <Input />
           </Form.Item>
-          <Form.Item label="User role" name="userrole"
+          <Form.Item
+            label="User role"
+            name="userrole"
             rules={[
               {
                 required: true,
@@ -178,39 +418,47 @@ function Users() {
             <Input />
           </Form.Item>
           <Form.Item
-        name="password"
-        label="Password"
-        rules={[
-          { required: true, message: 'Please enter your password' },
-        ]}
-      >
-        <Input.Password placeholder="Enter your password" />
-      </Form.Item>
+            name="password"
+            label="Password"
+            rules={[{ required: true, message: "Please enter your password" }]}
+          >
+            <Input.Password placeholder="Enter your password" />
+          </Form.Item>
 
-      <Form.Item
-        name="confirmPassword"
-        label="Confirm Password"
-        dependencies={['password']}
-        rules={[
-          { required: true, message: 'Please confirm your password' },
-          ({ getFieldValue }) => ({
-            validator(_, value) {
-              if (!value || getFieldValue('password') === value) {
-                return Promise.resolve();
+          <Form.Item
+            name="confirmPassword"
+            label="Confirm Password"
+            dependencies={["password"]}
+            rules={[
+              { required: true, message: "Please confirm your password" },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue("password") === value) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject("Passwords do not match");
+                },
+              }),
+            ]}
+          >
+            <Input.Password placeholder="Confirm your password" />
+          </Form.Item>
+          {/* <Form.Item label="Auto Login" name="autologin">
+            <Checkbox
+              checked={autologin}
+              onChange={(e) => {
+                setAutologin(e.target.checked);
+              }}
+            />
+          </Form.Item>
+          <Form.Item label="Auto Logout" name="autologout"
+            rules={[
+              {
+                pattern: /^(\d+)(s|m|h|d)|0$/,
+                message: "Please input auto logout as number with s|m|h|d",
               }
-              return Promise.reject('Passwords do not match');
-            },
-          }),
-        ]}
-      >
-        <Input.Password placeholder="Confirm your password" />
-      </Form.Item>
-          <Form.Item label="Auto Login" name="autologin">
-            <Checkbox checked={true} onChange={(e) => {
-              setAutologin(e.target.checked);
-            }}/>
-          </Form.Item> 
-          <Form.Item label="Auto Logout" name="autologout">
+            ]}
+          >
             <Input />
           </Form.Item>
           <Form.Item
@@ -221,6 +469,10 @@ function Users() {
                 required: true,
                 message: "Please input your value!",
               },
+              {
+                pattern: /^(\d+)(s|m|h)$/,
+                message: "Please input refresh as number with s|m|h",
+              }
             ]}
             initialValue={"30s"}
           >
@@ -234,12 +486,16 @@ function Users() {
                 required: true,
                 message: "Please input your value!",
               },
+              {
+                pattern: /^(\d+)$/,
+                message: "Please input row per page as number",
+              }
             ]}
             initialValue={"50"}
           >
             <Input />
-          </Form.Item>
-          <Form.Item >
+          </Form.Item> */}
+          <Form.Item>
             <Space>
               <Button type="primary" htmlType="submit">
                 Submit
@@ -256,38 +512,58 @@ function Users() {
         columns={columns}
         dataSource={userData}
       />
-      <Popconfirm
-        title="Delete the selected users?"
-        description="This action cannot be undone."
-        onConfirm={() => {
-          selectedRowKeys.forEach(async (key) => {
-            const response = await userService.deleteUser(key);
-            console.log(response);
-            if (response.error) {
-              JSAlert.alert(response.error.data, response.error.message);
-            } else {
-              setUserData(preUserData => {
-                return preUserData.filter(user => user.key !== key)
-              });
-            }
-          });
-          setSelectedRowKeys([]);
-        }}
-        onCancel={(e) => {
-          message.error("Canceled deleting users.");
-        }}
-        okText="Yes"
-        cancelText="No"
-      >
-        <Button
-          danger
-          disabled={selectedRowKeys.length > 0 ? false : true}
+      <Space>
+        <Popconfirm
+          title="Delete the selected users?"
+          description="This action cannot be undone."
+          onConfirm={() => {
+            selectedRowKeys.forEach(async (key) => {
+              const response = await userService.deleteUser(key);
+              console.log(response);
+              if (response.error) {
+                JSAlert.alert(response.error.data, response.error.message);
+              } else {
+                setUserData((preUserData) => {
+                  return preUserData.filter((user) => user.key !== key);
+                });
+              }
+            });
+            setSelectedRowKeys([]);
+          }}
+          onCancel={(e) => {
+            message.error("Canceled deleting users.");
+          }}
+          okText="Yes"
+          cancelText="No"
         >
-          Delete
+          <Button danger disabled={selectedRowKeys.length > 0 ? false : true}>
+            Delete
+          </Button>
+        </Popconfirm>
+
+        <Button
+          ghost
+          type="primary"
+          disabled={selectedRowKeys.length > 0 ? false : true}
+          onClick={() => {
+            if (selectedRowKeys.length > 1) {
+              JSAlert.alert("Please select only one host to edit");
+              return;
+            }
+            if (selectedRowKeys.length === 0) {
+              JSAlert.alert("Please select a host to edit");
+              return;
+            }
+            setOpen(true);
+          }}
+          onCancel={(e) => {
+            message.error("Canceled editing users.");
+          }}
+        >
+          Edit
         </Button>
-      </Popconfirm>
+      </Space>
     </>
   );
 }
-
 export default Users;
