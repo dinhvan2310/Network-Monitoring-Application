@@ -1,14 +1,129 @@
-import { Button, Space, Table, Tag, List, Typography, notification } from "antd";
+import { Button, Space, Table, Tag, List, Typography, notification, Tooltip, Input, Popconfirm } from "antd";
+import { InfoCircleOutlined, SearchOutlined } from "@ant-design/icons";
+import Highlighter from 'react-highlight-words';
 import JSAlert from "js-alert";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import hostService from "services/hostService";
 import itemService from "services/itemService";
-import ItemGraph from "../graph";
 import ItemLineChart from "components/ItemLineChart";
 import ItemListChart from "components/ItemListChart";
 
+const ItemValueType = {
+  0: "Numeric (float)",
+  3: "Numeric (unsigned)",
+  1: "Character",
+  2: "Log",
+  4: "Text",
+}
+
 function LatestData() {
+  const [searchText, setSearchText] = useState('');
+  const [searchedColumn, setSearchedColumn] = useState('');
+  const searchInput = useRef(null);
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+  };
+  const handleReset = (clearFilters) => {
+    clearFilters();
+    setSearchText('');
+  };
+  const getColumnSearchProps = (dataIndex) => ({
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
+      <div
+        style={{
+          padding: 8,
+        }}
+        onKeyDown={(e) => e.stopPropagation()}
+      >
+        <Input
+          ref={searchInput}
+          placeholder={`Search ${dataIndex}`}
+          value={selectedKeys[0]}
+          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+          style={{
+            marginBottom: 8,
+            display: 'block',
+          }}
+        />
+        <Space>
+          <Button
+            type="primary"
+            onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
+            icon={<SearchOutlined />}
+            size="small"
+            style={{
+              width: 90,
+            }}
+          >
+            Search
+          </Button>
+          <Button
+            onClick={() => clearFilters && handleReset(clearFilters)}
+            size="small"
+            style={{
+              width: 90,
+            }}
+          >
+            Reset
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              confirm({
+                closeDropdown: false,
+              });
+              setSearchText(selectedKeys[0]);
+              setSearchedColumn(dataIndex);
+            }}
+          >
+            Filter
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              close();
+            }}
+          >
+            close
+          </Button>
+        </Space>
+      </div>
+    ),
+    filterIcon: (filtered) => (
+      <SearchOutlined
+        style={{
+          color: filtered ? '#1677ff' : undefined,
+        }}
+      />
+    ),
+    onFilter: (value, record) =>
+      record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
+    onFilterDropdownOpenChange: (visible) => {
+      if (visible) {
+        setTimeout(() => searchInput.current?.select(), 100);
+      }
+    },
+    render: (text) =>
+      searchedColumn === dataIndex ? (
+        <Highlighter
+          highlightStyle={{
+            backgroundColor: '#ffc069',
+            padding: 0,
+          }}
+          searchWords={[searchText]}
+          autoEscape
+          textToHighlight={text ? text.toString() : ''}
+        />
+      ) : (
+        text
+      ),
+  });
   const columns = [
     {
       title: "Host",
@@ -19,11 +134,59 @@ function LatestData() {
       title: "Name",
       dataIndex: "name",
       key: "name",
+      ...getColumnSearchProps('name'),
+    },
+    {
+      title: "Type of information",
+      dataIndex: "value_type",
+      key: "value_type",
+      render: (value_type) => {
+        return <Tag >{ItemValueType[value_type]}</Tag>;
+      },
+      filters: [
+        {
+          text: 'Numeric (float)',
+          value: '0',
+        },
+        {
+          text: 'Numeric (unsigned)',
+          value: '3',
+        },
+        {
+          text: 'Character',
+          value: '1',
+        },
+        {
+          text: 'Log',
+          value: '2',
+        },
+        {
+          text: 'Text',
+          value: '4',
+        }
+      ],
+      onFilter: (value, record) => {
+        return record.value_type === value;
+      },
     },
     {
       title: "Last check",
       dataIndex: "lastcheck",
       key: "lastcheck",
+      render: (lastcheck) => {
+        if(lastcheck === '0') return ""
+        const timestamp = lastcheck;
+        const date = new Date(timestamp * 1000); // Phải nhân với 1000 vì JavaScript sử dụng milliseconds cho timestamp
+        const year = date.getFullYear();
+        const month = date.getMonth() + 1; // Tháng trong JavaScript bắt đầu từ 0
+        const day = date.getDate();
+        const hours = date.getHours();
+        const minutes = date.getMinutes();
+        const seconds = date.getSeconds();
+        const formattedTime = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+        return formattedTime;
+      },
+      sorter: (a, b) => a.lastcheck - b.lastcheck,
     },
     {
       title: "Last value",
@@ -31,6 +194,29 @@ function LatestData() {
       ellipsis: true,
       dataIndex: "lastvalue",
       key: "lastvalue",
+      render: (lastvalue, {prevvalue, units, value_type, lastcheck}) => {
+        if(lastvalue === '0' && prevvalue === '0' && lastcheck === '0') return ""
+        if(value_type === "0") {
+          return Number(lastvalue).toFixed(2)+ " " + units
+        } else if(value_type === "3") {
+          return Number(lastvalue).toFixed(0)+ " " + units
+        }
+        return lastvalue
+      },
+      filters: [
+        {
+          text: "Without data",
+          value: '0',
+        },
+        {
+          text: "With data",
+          value: '1',
+        }
+      ],
+      onFilter: (value, record) => {
+        if(value === '0') return record.lastvalue == 0 && record.prevvalue == 0
+        if(value === '1') return record.lastvalue != 0 || record.prevvalue != 0
+      }
     },
     {
       title: "Change",
@@ -43,9 +229,9 @@ function LatestData() {
       title: "Graph",
       dataIndex: "history",
       key: "history",
-      render: (history, {itemid, value_type}) => {
-        if (history !== "0") {
-          console.log(itemid);
+      width: "84px",
+      render: (history, {itemid, value_type, lastvalue, prevvalue, lastcheck}) => {
+        if (history !== "0" && (lastvalue != 0 || prevvalue != 0 || lastcheck != 0)) {
           if(value_type === "0" || value_type === "3") {
             return <Link to={`/monitoring/graph?itemid=${itemid}`}>Graph</Link>
           } else {
@@ -53,6 +239,31 @@ function LatestData() {
           }
         }
       },
+    },
+    {
+      title: "Info",
+      dataIndex: "error",
+      key: "error",
+      align: "center",
+      width: "64px",
+      render: (error) => {
+        if (error !== "") {
+          return (
+            <Tooltip title={error}>
+              <InfoCircleOutlined />
+            </Tooltip>
+          )
+        }
+      },
+      filters: [
+        {
+          text: "Error",
+          value: '0',
+        },
+      ],
+      onFilter: (value, record) => {
+        return record.error;
+      }
     }
   ];
 
@@ -94,21 +305,18 @@ function LatestData() {
       }
       console.log(response);
       const data = response.result.map(async (item) => {
-        const timestamp = item.lastclock;
-        const date = new Date(timestamp * 1000); // Phải nhân với 1000 vì JavaScript sử dụng milliseconds cho timestamp
-        const year = date.getFullYear();
-        const month = date.getMonth() + 1; // Tháng trong JavaScript bắt đầu từ 0
-        const day = date.getDate();
-        const hours = date.getHours();
-        const minutes = date.getMinutes();
-        const seconds = date.getSeconds();
-        const formattedTime = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+        
 
-        let change = "";
+        let change = null;
         let value = item.lastvalue;
-        if (item.value_type === "0") {
-          change = value - item.prevvalue;
-          change = change.toFixed(2) + " " + item.units;
+        if(item.lastvalue === '0' && item.prevvalue === '0' && item.lastclock === '0') {
+          change = ""
+        }else{
+          if (item.value_type === "0" || item.value_type === "3") {
+            change = value - item.prevvalue;
+            if(item.value_type === "0") change = change.toFixed(2) + " " + item.units;
+            else change = change.toFixed(0) + " " + item.units;
+          }
         }
 
         return {
@@ -117,13 +325,15 @@ function LatestData() {
           itemid: item.itemid,
           host: (await hostService.getHostName(item.hostid)).result[0].host,
           name: item.name,
-          lastcheck: formattedTime,
-          lastvalue: value + " " + item.units,
+          lastcheck: item.lastclock,
+          lastvalue: value,
+          prevvalue: item.prevvalue,
           change: change,
           value_type: item.value_type,
           history: item.history,
           delay: item.delay,
           units: item.units,
+          error: item.error,
         };
       });
       setDataSource(await Promise.all(data));
@@ -146,7 +356,7 @@ function LatestData() {
   return (
     <>
       <Table
-        title={() => "Hosts"}
+        title={() => "Last data"}
         rowSelection={rowSelection}
         columns={columns}
         dataSource={dataSource}
@@ -160,7 +370,7 @@ function LatestData() {
               return <ItemListChart  item={item}/>
             }
           },
-          rowExpandable: (item) => item.history != "0",
+          rowExpandable: (item) => item.history != "0" && !item.error && (item.lastvalue != 0 || item.prevvalue != 0 || item.lastcheck != 0),
           onExpand: async (expanded, record) => {
 
           },
@@ -172,16 +382,16 @@ function LatestData() {
           disabled={selectedRowKeys.length > 0 ? false : true}
           onClick={() => {
             selectedRowKeys.forEach(async (key) => {
-              const response = await hostService.disableHost(key);
+              const response = await itemService.disableItem(key);
               if (response.error) {
                 JSAlert.alert(response.error.data, response.error.message);
               } else {
                 setDataSource(
-                  dataSource.map((host) => {
-                    if (host.key === key) {
-                      host.status = "1";
+                  dataSource => dataSource.map(item => {
+                    if (item.key === key) {
+                      item.status = "1";
                     }
-                    return host;
+                    return item;
                   })
                 );
               }
@@ -197,16 +407,16 @@ function LatestData() {
           disabled={selectedRowKeys.length > 0 ? false : true}
           onClick={() => {
             selectedRowKeys.forEach(async (key) => {
-              const response = await hostService.enableHost(key);
+              const response = await itemService.enableItem(key);
               if (response.error) {
                 JSAlert.alert(response.error.data, response.error.message);
               } else {
                 setDataSource(
-                  dataSource.map((host) => {
-                    if (host.key === key) {
-                      host.status = "0";
+                  dataSource => dataSource.map(item => {
+                    if (item.key === key) {
+                      item.status = "0";
                     }
-                    return host;
+                    return item;
                   })
                 );
               }
@@ -216,29 +426,35 @@ function LatestData() {
         >
           Enabled
         </Button>
-        <Button
-          type="primary"
-          ghost
-          danger
-          disabled={selectedRowKeys.length > 0 ? false : true}
-          onClick={() => {
+        <Popconfirm
+          title={`Are you sure to delete ${selectedRowKeys.length} items?`}
+          description="This action cannot be undone."
+          onConfirm={async () => {
             selectedRowKeys.forEach(async (key) => {
-              const response = await hostService.deleteHost(key);
+              const response = await itemService.deleteItem(key);
               if (response.error) {
                 JSAlert.alert(response.error.data, response.error.message);
               } else {
                 setDataSource(
-                  dataSource.filter((host) => {
-                    return host.key !== key;
-                  })
+                  dataSource => dataSource.filter(item => item.key !== key)
                 );
               }
             });
             setSelectedRowKeys([]);
           }}
+          okText="Yes"
+          cancelText="No"
+        >
+          <Button
+          type="primary"
+          ghost
+          danger
+          disabled={selectedRowKeys.length > 0 ? false : true}
+          
         >
           Delete
         </Button>
+        </Popconfirm>
       </Space>
     </>
   );

@@ -10,7 +10,7 @@ import {
   Tooltip,
   TreeSelect,
 } from "antd";
-import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
+import { PlusOutlined, SearchOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import Highlighter from 'react-highlight-words';
 import JSAlert from "js-alert";
 import { useEffect, useRef, useState } from "react";
@@ -289,6 +289,7 @@ function Hosts() {
       const hostInterfaces = hosts.result.map(async (host) => {
         const hostInterfaces = await hostService.getHostInterfaces(host.hostid);
         console.log(await itemService.getItemsByHost(host.hostid))
+        const item = await itemService.getItemsByHost(host.hostid);
         return {
           key: host.hostid,
           name: host.name,
@@ -297,7 +298,7 @@ function Hosts() {
               " : " +
               hostInterfaces.result[0].port
             : "",
-            item: await itemService.getItemsByHost(host.hostid),
+          item: item,
           status: host.status,
           hostInterfaces: hostInterfaces,
           type: hostInterfaces.result[0] ? hostInterfaces.result[0].type : "",
@@ -578,11 +579,11 @@ function Hosts() {
               host: `${values.host}`,
             }
             if(values.templateid){
-              host.templates = [
-                {
-                  templateid: `${values.templateid}`,
-                },
-              ];
+              host.templates = values.templateid.map(id => {
+                return {
+                  templateid: id
+                }
+              })
             }
             if(values.groupid){
               host.groups = values.groupid.map(id => {

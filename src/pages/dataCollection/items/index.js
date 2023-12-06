@@ -1,7 +1,8 @@
-import { Button, Form, Input, Modal, Space, Table, Tag, Tooltip, Select } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
+import { Button, Form, Input, Modal, Space, Table, Tag, Tooltip, Select, Popconfirm} from "antd";
+import { PlusOutlined, SearchOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import JSAlert from "js-alert";
-import { useEffect, useState } from "react";
+import Highlighter from 'react-highlight-words';
+import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import itemService from "services/itemService";
 import hostService from "services/hostService";
@@ -27,13 +28,128 @@ const ItemType = {
     21: "Script",
 };
 
+const ItemValueType = {
+  0: "Numeric (float)",
+  3: "Numeric (unsigned)",
+  1: "Character",
+  2: "Log",
+  4: "Text",
+}
+
 
 function Items() {
+  const [searchText, setSearchText] = useState('');
+  const [searchedColumn, setSearchedColumn] = useState('');
+  const searchInput = useRef(null);
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+  };
+  const handleReset = (clearFilters) => {
+    clearFilters();
+    setSearchText('');
+  };
+  const getColumnSearchProps = (dataIndex) => ({
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
+      <div
+        style={{
+          padding: 8,
+        }}
+        onKeyDown={(e) => e.stopPropagation()}
+      >
+        <Input
+          ref={searchInput}
+          placeholder={`Search ${dataIndex}`}
+          value={selectedKeys[0]}
+          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+          style={{
+            marginBottom: 8,
+            display: 'block',
+          }}
+        />
+        <Space>
+          <Button
+            type="primary"
+            onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
+            icon={<SearchOutlined />}
+            size="small"
+            style={{
+              width: 90,
+            }}
+          >
+            Search
+          </Button>
+          <Button
+            onClick={() => clearFilters && handleReset(clearFilters)}
+            size="small"
+            style={{
+              width: 90,
+            }}
+          >
+            Reset
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              confirm({
+                closeDropdown: false,
+              });
+              setSearchText(selectedKeys[0]);
+              setSearchedColumn(dataIndex);
+            }}
+          >
+            Filter
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              close();
+            }}
+          >
+            close
+          </Button>
+        </Space>
+      </div>
+    ),
+    filterIcon: (filtered) => (
+      <SearchOutlined
+        style={{
+          color: filtered ? '#1677ff' : undefined,
+        }}
+      />
+    ),
+    onFilter: (value, record) =>
+      record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
+    onFilterDropdownOpenChange: (visible) => {
+      if (visible) {
+        setTimeout(() => searchInput.current?.select(), 100);
+      }
+    },
+    render: (text) =>
+      searchedColumn === dataIndex ? (
+        <Highlighter
+          highlightStyle={{
+            backgroundColor: '#ffc069',
+            padding: 0,
+          }}
+          searchWords={[searchText]}
+          autoEscape
+          textToHighlight={text ? text.toString() : ''}
+        />
+      ) : (
+        text
+      ),
+  });
   const columns = [
     {
       title: "Name",
       dataIndex: "name",
       key: "name",
+      ...getColumnSearchProps('name'),
     },
     {
       title: "Key",
@@ -44,26 +160,223 @@ function Items() {
       title: "Interval",
       dataIndex: "interval",
       key: "interval",
+      sorter: (a, b) => {
+        let intervalA = a.interval;
+        let intervalB = b.interval;
+        if(a.interval[a.interval.length - 1] === "s") intervalA = Number(a.interval.replace(/[^0-9]/g, ''))
+        else if(a.interval[a.interval.length - 1] === "m") intervalA = Number(a.interval.replace(/[^0-9]/g, '')) * 60
+        else if(a.interval[a.interval.length - 1] === "h") intervalA = Number(a.interval.replace(/[^0-9]/g, '')) * 3600
+        else if(a.interval[a.interval.length - 1] === "d") intervalA = Number(a.interval.replace(/[^0-9]/g, '')) * 86400
+        if(b.interval[b.interval.length - 1] === "s") b.interval = Number(b.interval.replace(/[^0-9]/g, ''))
+        else if(b.interval[b.interval.length - 1] === "m") intervalB = Number(b.interval.replace(/[^0-9]/g, '')) * 60
+        else if(b.interval[b.interval.length - 1] === "h") intervalB = Number(b.interval.replace(/[^0-9]/g, '')) * 3600
+        else if(b.interval[b.interval.length - 1] === "d") intervalB = Number(b.interval.replace(/[^0-9]/g, '')) * 86400
+        return intervalA - intervalB;
+      },
     },
     {
       title: "History",
       dataIndex: "history",
       key: "history",
+      sorter: (a, b) => {
+        let historyA = a.history;
+        let historyB = b.history;
+        if(a.history[a.history.length - 1] === "s") historyA = Number(a.history.replace(/[^0-9]/g, ''))
+        else if(a.history[a.history.length - 1] === "m") historyA = Number(a.history.replace(/[^0-9]/g, '')) * 60
+        else if(a.history[a.history.length - 1] === "h") historyA = Number(a.history.replace(/[^0-9]/g, '')) * 3600
+        else if(a.history[a.history.length - 1] === "d") historyA = Number(a.history.replace(/[^0-9]/g, '')) * 86400
+        if(b.history[b.history.length - 1] === "s") b.history = Number(b.history.replace(/[^0-9]/g, ''))
+        else if(b.history[b.history.length - 1] === "m") historyB = Number(b.history.replace(/[^0-9]/g, '')) * 60
+        else if(b.history[b.history.length - 1] === "h") historyB = Number(b.history.replace(/[^0-9]/g, '')) * 3600
+        else if(b.history[b.history.length - 1] === "d") historyB = Number(b.history.replace(/[^0-9]/g, '')) * 86400
+        return historyA - historyB;
+      },
     },
     {
         title: "Trends",
         dataIndex: "trends",
         key: "trends",
+        sorter: (a, b) => {
+          let trendsA = a.trends;
+          let trendsB = b.trends;
+          if(a.trends[a.trends.length - 1] === "s") trendsA = Number(a.trends.replace(/[^0-9]/g, ''))
+          else if(a.trends[a.trends.length - 1] === "m") trendsA = Number(a.trends.replace(/[^0-9]/g, '')) * 60
+          else if(a.trends[a.trends.length - 1] === "h") trendsA = Number(a.trends.replace(/[^0-9]/g, '')) * 3600
+          else if(a.trends[a.trends.length - 1] === "d") trendsA = Number(a.trends.replace(/[^0-9]/g, '')) * 86400
+          if(b.trends[b.trends.length - 1] === "s") b.trends = Number(b.trends.replace(/[^0-9]/g, ''))
+          else if(b.trends[b.trends.length - 1] === "m") trendsB = Number(b.trends.replace(/[^0-9]/g, '')) * 60
+          else if(b.trends[b.trends.length - 1] === "h") trendsB = Number(b.trends.replace(/[^0-9]/g, '')) * 3600
+          else if(b.trends[b.trends.length - 1] === "d") trendsB = Number(b.trends.replace(/[^0-9]/g, '')) * 86400
+          return trendsA - trendsB;
+        },
     },
     {
         title: "Type",
         dataIndex: "type",
         key: "type",
+        render: (type) => {
+          return <Tag >{ItemType[type]}</Tag>;
+        },
+        filters: [
+          {
+            text: 'Zabbix agent',
+            value: '0',
+          },
+          {
+            text: 'Zabbix trapper',
+            value: '2',
+          },
+          {
+            text: 'Simple check',
+            value: '3',
+          },
+          {
+            text: 'Zabbix internal',
+            value: '5',
+          },
+          {
+            text: 'Zabbix agent (active)',
+            value: '7',
+          },
+          {
+            text: 'Web item',
+            value: '9',
+          },
+          {
+            text: 'External check',
+            value: '10',
+          },
+          {
+            text: 'Database monitor',
+            value: '11',
+          },
+          {
+            text: 'IPMI agent',
+            value: '12',
+          },
+          {
+            text: 'SSH agent',
+            value: '13',
+          },
+          {
+            text: 'TELNET agent',
+            value: '14',
+          },
+          {
+            text: 'CALCULATED',
+            value: '15',
+          },
+          {
+            text: 'JMX AGENT',
+            value: '16',
+          },
+          {
+            text: 'SNMP TRAP',
+            value: '17',
+          },
+          {
+            text: 'Dependent item',
+            value: '18',
+          },
+          {
+            text: 'HTTP agent',
+            value: '19',
+          },
+          {
+            text: 'SNMP agent',
+            value: '20',
+          },
+          {
+            text: 'Script',
+            value: '21',
+          }
+        ],
+        defaultFilteredValue: [
+          20, 5
+        ],
+        onFilter: (value, record) => {
+          return record.type === value;
+        }
+    },
+    {
+      title: "Type of information",
+      dataIndex: "value_type",
+      key: "value_type",
+      render: (value_type) => {
+        return <Tag >{ItemValueType[value_type]}</Tag>;
+      },
+      filters: [
+        {
+          text: 'Numeric (float)',
+          value: '0',
+        },
+        {
+          text: 'Numeric (unsigned)',
+          value: '3',
+        },
+        {
+          text: 'Character',
+          value: '1',
+        },
+        {
+          text: 'Log',
+          value: '2',
+        },
+        {
+          text: 'Text',
+          value: '4',
+        }
+      ],
+      onFilter: (value, record) => {
+        return record.value_type === value;
+      },
     },
     {
         title: "Status",
         dataIndex: "status",
         key: "status",
+        render: (status) => {
+          console.log(status, status)
+          return status[1] === "1"? <Tag color="#333">Not Support</Tag> : 
+                (status[0] === "0" ? <Tag color="#2ecc71">{"Enabled"}</Tag> : <Tag color="#e74c3c">Disabled</Tag>)
+        },
+        filters: [
+          {
+            text: 'enabled',
+            value: '0',
+          },
+          {
+            text: 'disabled',
+            value: '2',
+          },
+          {
+            text: 'not support',
+            value: '1',
+          }
+        ],
+        onFilter: (value, record) => {
+          console.log(value, record);
+          if(value === "0") return record.status[0] === "0" && record.status[1] === "0";
+          if(value === "2") return record.status[0] === "1" && record.status[1] === "0";
+          if(value === "1") return record.status[1] === "1";
+        },
+    },
+    {
+      title: "Info",
+      dataIndex: "error",
+      key: "error",
+      align: "center",
+      width: "64px",
+      render: (error) => {
+        console.log(error);
+        if (error) {
+          return (
+            <Tooltip title={error}>
+              <InfoCircleOutlined />
+            </Tooltip>
+          )
+        }
+      },
     },
     {
         title: () => (
@@ -104,17 +417,18 @@ function Items() {
     const fetchData = async () => {
         setLoading(true);
         const items = await itemService.getItemsByHost(hostid);
-        const dataTable = await Promise.all(items.result.map(async (template) => {
+        const dataTable = await Promise.all(items.result.map(async (item) => {
             return {
-                key: template.itemid,
-                name: template.name,
-                key_: template.key_,
-                interval: template.delay === "0" ? "" : template.delay,
-                history: template.history,
-                trends: template.trends,
-                type: ItemType[template.type],
-                status: template.state === "1"? <Tag color="#333">Not Support</Tag> : 
-                (template.status === "0" ? <Tag color="#2ecc71">{"Enabled"}</Tag> : <Tag color="#e74c3c">Disabled</Tag>),
+                key: item.itemid,
+                name: item.name,
+                key_: item.key_,
+                interval: item.delay === "0" ? "" : item.delay,
+                history: item.history,
+                trends: item.trends,
+                type: item.type,
+                status: [item.status, item.state],
+                error: item.error,
+                value_type: item.value_type,
             }
         }))
         setDataSource(dataTable);
@@ -577,12 +891,10 @@ function Items() {
         >
           Enabled
         </Button>
-        <Button
-          type="primary"
-          ghost
-          danger
-          disabled={selectedRowKeys.length > 0 ? false : true}
-          onClick={() => {
+        <Popconfirm
+          title= {`Are you sure to delete ${selectedRowKeys.length} items?`}
+          description="This action cannot be undone."
+          onConfirm={() => {
             selectedRowKeys.forEach(async (key) => {
               const response = await itemService.deleteItem(key);
               if (response.error) {
@@ -598,34 +910,25 @@ function Items() {
             });
             setSelectedRowKeys([]);
           }}
+          okText="Yes"
+          cancelText="No"
+        >
+          <Button
+          type="primary"
+          ghost
+          danger
+          disabled={selectedRowKeys.length > 0 ? false : true}
+          
+          
         >
           Delete
         </Button>
-        <Button
-          type="primary"
-          danger
-          ghost
-          disabled={selectedRowKeys.length > 0 ? false : true}
-          onClick={() => {
-            selectedRowKeys.forEach(async (key) => {
-              const response = await itemService.clearHistoryAndTrends(key)
-              console.log(response)
-              if (response.error) {
-                JSAlert.alert(response.error.data, response.error.message);
-              } else {
-                setReload(!reload);
-              }
-            });
-            setSelectedRowKeys([]);
-          }}
-        >
-          Clear history and trends
-        </Button>
-        <Button
-          type="primary"
-          ghost
-          disabled={selectedRowKeys.length > 0 ? false : true}
-          onClick={async () => {
+        </Popconfirm>
+        
+        <Popconfirm
+          title={`Are you sure to delete ${selectedRowKeys.length} items?`}
+          description="This action cannot be undone."
+          onConfirm={async () => {
             if (selectedRowKeys.length > 1) {
               JSAlert.alert("Please select only one host to edit");
               return;
@@ -643,9 +946,18 @@ function Items() {
               setIsModalUpdateShow(true);
             }
           }}
+          okText="Yes"
+          cancelText="No"
+        >
+          <Button
+          type="primary"
+          ghost
+          disabled={selectedRowKeys.length > 0 ? false : true}
         >
           Edit
         </Button>
+        </Popconfirm>
+        
       </Space>
     </>
   );

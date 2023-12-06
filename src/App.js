@@ -20,10 +20,11 @@ import RequireAuth from 'utils/RequireAuth';
 const App = () => {
 
   const func = async () => {
-    const response = await itemService.getItemByName("Zabbix server: Configuration cache, % used")
+    const response = await itemService.getItemByName("Zabbix server: Zabbix proxies stats")
+    console.log(response)
   }
 
-  // func()
+  func()
 
 
   return (
