@@ -675,6 +675,10 @@ function Items() {
             if(values.trends === "0d") values.trends = "0";
             if(values.units === undefined) values.units = "";
             if(values.description === undefined) values.description = "";
+            if(selectedItem.templateid !== '0')
+              values.value_type = null
+            console.log(values)
+
             const response = await itemService.updateItem(values);
             if(response.error){
               JSAlert.alert(response.error.data, response.error.message);
@@ -705,7 +709,7 @@ function Items() {
             ]}
             initialValue={ selectedItem ? selectedItem.name : "" }
           >
-            <Input />
+            <Input disabled={!(selectedItem.templateid === '0')}/>
           </Form.Item>
             <Form.Item
             label="Key"
@@ -718,7 +722,7 @@ function Items() {
             ]}
             initialValue={selectedItem ? selectedItem.key_ : ""}
           >
-            <Input />
+            <Input disabled={!(selectedItem.templateid === '0')}/>
           </Form.Item>
           <Form.Item
             label="Type of information"
@@ -732,6 +736,7 @@ function Items() {
             ]}
           >
             <Select
+              disabled={!(selectedItem.templateid === '0')}
               style={{
                 width: '100%',
               }}
@@ -773,7 +778,7 @@ function Items() {
             ]}
             initialValue={selectedItem ? selectedItem.snmp_oid : ""}
           >
-            <Input />
+            <Input disabled={!(selectedItem.templateid === '0')}/>
           </Form.Item>
           {(type == 0 || type == 3) && (
             <Form.Item
@@ -781,7 +786,7 @@ function Items() {
             name={"units"}
             initialValue={selectedItem ? selectedItem.units : ""}
           >
-            <Input />
+            <Input disabled={!(selectedItem.templateid === '0')}/>
           </Form.Item>
           ) }
           <Form.Item
@@ -814,7 +819,7 @@ function Items() {
                 message: "Please input history storage period in format 90d",
               }
             ]}
-            initialValue={selectedItem ? selectedItem.history : ""}
+            initialValue={selectedItem ? (selectedItem.history === '0' ? '0d' : selectedItem.history) : ""}
           >
             <Input placeholder="90d"/>
           </Form.Item>
@@ -831,7 +836,7 @@ function Items() {
                 message: "Please input trend storage period in format 365d",
               }
             ]}
-            initialValue={selectedItem ? selectedItem.trends : ""}
+            initialValue={selectedItem ? (selectedItem.trends === '0' ? '0d' : selectedItem.trends) : ""}
           >
             <Input placeholder="365d"/>
           </Form.Item>
@@ -940,10 +945,11 @@ function Items() {
         </Button>
         </Popconfirm>
         
-        <Popconfirm
-          title={`Are you sure to delete ${selectedRowKeys.length} items?`}
-          description="This action cannot be undone."
-          onConfirm={async () => {
+          <Button
+          type="primary"
+          ghost
+          disabled={selectedRowKeys.length > 0 ? false : true}
+          onClick={async () => {
             if (selectedRowKeys.length > 1) {
               JSAlert.alert("Please select only one host to edit");
               return;
@@ -961,17 +967,9 @@ function Items() {
               setIsModalUpdateShow(true);
             }
           }}
-          okText="Yes"
-          cancelText="No"
-        >
-          <Button
-          type="primary"
-          ghost
-          disabled={selectedRowKeys.length > 0 ? false : true}
         >
           Edit
         </Button>
-        </Popconfirm>
         
       </Space>
     </>

@@ -181,7 +181,7 @@ const itemService = {
                 "id": 1
             })
         }
-        else{
+        else if(item.value_type == '1' || item.value_type == '2' || item.value_type == '4'){
             return httpRequests.post('', {
                 "jsonrpc": "2.0",
                 "method": "item.update",
@@ -194,6 +194,21 @@ const itemService = {
                     "history": `${item.history}`,
                     "trends": `${item.trends}`,
                     "snmp_oid": `${item.snmp_oid}`,
+                    "description": `${item.description}`,
+                },
+                "auth": `${localStorage.getItem("token")}`,
+                "id": 1
+            })
+        }
+        else{
+            return httpRequests.post('', {
+                "jsonrpc": "2.0",
+                "method": "item.update",
+                "params": {
+                    "itemid": `${item.itemid}`,
+                    "delay": `${item.delay}`,
+                    "history": `${item.history}`,
+                    "trends": `${item.trends}`,
                     "description": `${item.description}`,
                 },
                 "auth": `${localStorage.getItem("token")}`,
