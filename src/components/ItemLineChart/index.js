@@ -85,6 +85,7 @@ const ItemLineChart = ({ item, isLabel = true }) => {
         Math.floor(time[0]["$d"].getTime() / 1000),
         Math.floor(time[1]["$d"].getTime() / 1000)
       );
+      console.log(history);
       let labels = [];
       let dataSet = [];
       history.result.forEach((item) => {

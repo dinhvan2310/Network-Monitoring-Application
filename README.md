@@ -1,3 +1,4 @@
--- Fix chắc gần hết bug rồi, còn 1 số bug nhỏ nhỏ nữa thôi, mà chắc cũng không cần fix nữa :v
--- Còn lại là làm thêm 1 số chức năng nữa thôi, chắc làm được hết trong 1 tuần nữa :v
--- Có thể làm thêm 1 số chức năng nữa, nhưng chắc không làm nữa, nhầm ráng làm update item nha em :v
+- Mới làm sơ giao diện dashboard, chưa có gì cả
+- Update item chưa làm xong (chưa có giao diện)
+- Xong 2 phần trên thì chắc là xong hết rồi, chưa biết có gì nữa không, chắc là không, chắc là xong rồi :v
+
