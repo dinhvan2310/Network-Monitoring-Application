@@ -114,6 +114,9 @@ function TemplateGroups() {
       ),
   });
 
+  const [reload, setReload] = useState(false);
+
+
   const [dataSource, setDataSource] = useState([]);
   useEffect(() => {
     const fetchTemplateGroups = async () => {
@@ -137,7 +140,7 @@ function TemplateGroups() {
       setLoading(false);
     };
     fetchTemplateGroups();
-  }, []);
+  }, [reload]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalEditOpen, setIsModalEditOpen] = useState(false);
@@ -219,10 +222,7 @@ function TemplateGroups() {
               JSAlert.alert(response.error.data, response.error.message);
             } else {
               JSAlert.alert("Template group created successfully.");
-              setDataSource([
-                ...dataSource,
-                { key: response.result.groupids[0], name: values.groupName, templates: [] },
-              ]);
+              setReload(!reload);
               setIsModalOpen(false);
             }
           }}

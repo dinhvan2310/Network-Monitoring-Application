@@ -78,6 +78,17 @@ const templateService = {
             "id": 1
         })
     },
+    createTempalteGroup: async (name) => {
+        return httpRequests.post('', {
+            "jsonrpc": "2.0",
+            "method": "templategroup.create",
+            "params": {
+                "name": `${name}`
+            },
+            "auth": `${localStorage.getItem("token")}`,
+            "id": 1
+        })
+    },
     createTempalte: async (template) => {
         return httpRequests.post('', {
             "jsonrpc": "2.0",

@@ -36,7 +36,7 @@ const disableTime = (current) => {
   return current && current > dayjs().endOf("day");
 };
 
-const ItemLineChart = ({ item }) => {
+const ItemLineChart = ({ item, isLabel = true }) => {
   const [data, setData] = useState(() => {
     return {
       labels: [],
@@ -70,16 +70,7 @@ const ItemLineChart = ({ item }) => {
   });
 
   const options = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: "top",
-      },
-      title: {
-        display: true,
-        text: item.title,
-      },
-    },
+    
   };
 
   const handleDatePickerChange = (value, dateString) => {
@@ -89,7 +80,6 @@ const ItemLineChart = ({ item }) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      console.log(item);
       const history = await itemService.getHistory(
         item,
         Math.floor(time[0]["$d"].getTime() / 1000),
@@ -102,10 +92,10 @@ const ItemLineChart = ({ item }) => {
         dataSet.push(Number(item.value));
       });
       setData({
-        labels: labels,
+        labels: isLabel ? labels : labels.map(() => ""),
         datasets: [
           {
-            label: item.name + " (" + item.units + ")",
+            label: isLabel ? item.name + " (" + item.units + ")" : "",
             data: dataSet,
             borderColor: "rgb(255, 99, 132)",
             backgroundColor: "rgba(255, 99, 132, 0.5)",
@@ -127,19 +117,34 @@ const ItemLineChart = ({ item }) => {
         align="center"
         size={24}
       >
-        <DatePicker.RangePicker
-          showTime
-          defaultValue={time}
-          onChange={handleDatePickerChange}
-          disabledDate={disableTime}
-        />
-        <Statistic title="Max" value={Math.max(...data.datasets[0].data)} precision={2}/>
-        <Statistic title="Min" value={Math.min(...data.datasets[0].data)} precision={2}/>
-        <Statistic
-          title="Avg"
-          value={data.datasets[0].data.reduce((a, b) => a + b, 0) / data.datasets[0].data.length}
-          precision={2}
-        />
+        {isLabel && (
+          <>
+            <DatePicker.RangePicker
+              showTime
+              defaultValue={time}
+              onChange={handleDatePickerChange}
+              disabledDate={disableTime}
+            />
+            <Statistic
+              title="Max"
+              value={Math.max(...data.datasets[0].data)}
+              precision={2}
+            />
+            <Statistic
+              title="Min"
+              value={Math.min(...data.datasets[0].data)}
+              precision={2}
+            />
+            <Statistic
+              title="Avg"
+              value={
+                data.datasets[0].data.reduce((a, b) => a + b, 0) /
+                data.datasets[0].data.length
+              }
+              precision={2}
+            />
+          </>
+        )}
       </Space>
     </>
   );

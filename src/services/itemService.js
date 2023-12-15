@@ -117,6 +117,49 @@ const itemService = {
         }
         
     },
+    createItemWithoutInterfaceid: async (item) => {
+        if(item.value_type == '0' || item.value_type == '3'){
+            return httpRequests.post('', {
+                "jsonrpc": "2.0",
+                "method": "item.create",
+                "params": {
+                    "name": `${item.host}`,
+                    "key_": `${item.key_}`,
+                    "hostid": `${item.hostid}`,
+                    "type": 20,
+                    "value_type": `${item.value_type}`,
+                    "delay": `${item.delay}`,
+                    "history": `${item.history}`,
+                    "trends": `${item.trends}`,
+                    "snmp_oid": `${item.snmp_oid}`,
+                    "units": `${item.units}`,
+                    "description": `${item.description}`,
+                },
+                "auth": `${localStorage.getItem("token")}`,
+                "id": 1
+            })
+        }else{
+            return httpRequests.post('', {
+                "jsonrpc": "2.0",
+                "method": "item.create",
+                "params": {
+                    "hostid": `${item.hostid}`,
+                    "name": `${item.host}`,
+                    "key_": `${item.key_}`,
+                    "type": 20,
+                    "value_type": `${item.value_type}`,
+                    "delay": `${item.delay}`,
+                    "history": `${item.history}`,
+                    "trends": `${item.trends}`,
+                    "snmp_oid": `${item.snmp_oid}`,
+                    "description": `${item.description}`,
+                },
+                "auth": `${localStorage.getItem("token")}`,
+                "id": 1
+            })
+        }
+        
+    },
     updateItem: async (item) => {
         if(item.value_type == '0' || item.value_type == '3'){
             return httpRequests.post('', {

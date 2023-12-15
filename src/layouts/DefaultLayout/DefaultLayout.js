@@ -215,7 +215,7 @@ const DefaultLayout = () => {
           style={{
             margin: `2px 2px`,
             padding: 24,
-            paddingTop: 0,
+            // paddingTop: 24,
             minHeight: 280,
             background: colorBgContainer,
             overflow: "scroll",

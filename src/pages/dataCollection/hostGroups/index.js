@@ -316,7 +316,7 @@ function HostGroups() {
           <Form.Item style={{marginTop: "24px"}} label="Group Name" name="groupName" rules={[
               {
                 required: true,
-                message: "Please input your username!",
+                message: "Please input your group name!",
               },
             ]}>
             <Input />

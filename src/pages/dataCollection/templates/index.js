@@ -156,14 +156,15 @@ function Templates() {
     {
       title: "Item",
       key: "item",
-      render: ({item}) => {
+      render: ({item, key}) => {
         if(!item) return (
           <Tag color="#2ecc71">0</Tag>
         )
         return (
           <Space>
             <Tag color="#2ecc71">{item.result.length}</Tag>
-            {item.result.length > 0 ? (<Link to={`/dataCollection/items?hostid=${item.result[0].hostid}`}>{"Item"}</Link>) : (null)}
+            {/* <Link to={`/dataCollection/items?hostid=${item.result[0].hostid}`}>{"Item"}</Link> */}
+            <Link to={`/dataCollection/items?templateid=${key}`}>Item</Link>
           </Space>
         )
       }

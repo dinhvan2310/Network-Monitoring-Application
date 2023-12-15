@@ -4,6 +4,7 @@ import Hosts from 'pages/dataCollection/hosts';
 import Items from 'pages/dataCollection/items';
 import TemplateGroups from 'pages/dataCollection/templateGroups';
 import Templates from 'pages/dataCollection/templates';
+import Home from 'pages/home';
 import Login from 'pages/login';
 import ItemGraph from 'pages/monitoring/graph';
 import LatestData from 'pages/monitoring/latestData';
@@ -20,8 +21,9 @@ import RequireAuth from 'utils/RequireAuth';
 const App = () => {
 
   const func = async () => {
-    const response = await itemService.getItemByName("Zabbix server: Zabbix proxies stats")
-    console.log(response)
+    // const response = await itemService.getItemByName("Zabbix server: Zabbix proxies stats")
+    // console.log(response)
+    
   }
 
   func()
@@ -31,6 +33,7 @@ const App = () => {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<RequireAuth><DefaultLayout/></RequireAuth>}>
+          <Route path='/' element={<RequireAuth><Home/></RequireAuth>} />
           <Route path="/users" element={<RequireAuth isAdmin={true}><Users/></RequireAuth>} />
           <Route path="/monitoring/hosts" element={<RequireAuth><MonitoringHosts/></RequireAuth>} />
           <Route path="/monitoring/latestData" element={<RequireAuth><LatestData/></RequireAuth>} />

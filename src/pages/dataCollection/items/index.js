@@ -408,6 +408,10 @@ function Items() {
     return queryString.get("hostid");
   });
 
+  const [templateid, setTemplateid] = useState(() => {
+    return queryString.get("templateid");
+  });
+
   
   useEffect(() => {
     setHostid(queryString.get("hostid"));
@@ -416,7 +420,12 @@ function Items() {
   useEffect(() => {
     const fetchData = async () => {
         setLoading(true);
-        const items = await itemService.getItemsByHost(hostid);
+        let items
+        if(hostid)
+          items = await itemService.getItemsByHost(hostid);
+        else if(templateid)
+          items = await itemService.getItemByTemplate(templateid);
+        console.log(items)
         const dataTable = await Promise.all(items.result.map(async (item) => {
             return {
                 key: item.itemid,
@@ -472,27 +481,30 @@ function Items() {
             if(values.trends === "0d") values.trends = "0";
             if(values.units === undefined) values.units = "";
             if(values.description === undefined) values.description = "";
+            let response
             console.log(await hostService.getHostInterfaces(hostid))
-            values.interfaceid = (await hostService.getHostInterfaces(hostid)).result[0].interfaceid;
+            if(hostid)
+              {
+                values.interfaceid = (await hostService.getHostInterfaces(hostid)).result[0].interfaceid;
+                values.hostid = hostid;
+                response = await itemService.createItem(values);
+              }
+              else{
+                values.hostid = templateid;
+                response = await itemService.createItemWithoutInterfaceid(values);
+              }
+
             console.log(values);
-            const response = await itemService.createItem(values);
             if(response.error){
               JSAlert.alert(response.error.data, response.error.message);
             }else{
               JSAlert.alert("Update host successfully");
               setReload(!reload);
-              setIsModalUpdateShow(false);
+              setIsModalAddShow(false);
             }
           }}
           autoComplete="off"
         >
-          <Form.Item
-            name={"hostid"}
-            initialValue={hostid}
-            hidden={true}
-          >
-            <Input type="hidden"/>
-          </Form.Item>
             <Form.Item
             label="Host name"
             name={"host"}
@@ -592,6 +604,7 @@ function Items() {
                 message: "Please input update interval in format 30s,1m,2h,1d",
               }
             ]}
+            initialValue={"30s"}
           >
             <Input placeholder="30s,1m,2h,1d"/>
           </Form.Item>
@@ -608,6 +621,7 @@ function Items() {
                 message: "Please input history storage period in format 90d",
               }
             ]}
+            initialValue={"90d"}
           >
             <Input placeholder="90d"/>
           </Form.Item>
@@ -624,6 +638,7 @@ function Items() {
                 message: "Please input trend storage period in format 365d",
               }
             ]}
+            initialValue={"365d"}
           >
             <Input placeholder="365d"/>
           </Form.Item>

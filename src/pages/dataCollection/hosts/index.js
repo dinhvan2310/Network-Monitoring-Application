@@ -18,6 +18,7 @@ import hostService from "services/hostService";
 import templateService from "services/templateService";
 import itemService from "services/itemService";
 import { Link } from "react-router-dom";
+import { key } from "localforage";
 
 function Hosts() {
   //
@@ -143,14 +144,14 @@ function Hosts() {
     {
       title: "Item",
       key: "item",
-      render: ({item}) => {
+      render: ({item, key}) => {
         if(!item) return (
           <Tag color="#2ecc71">0</Tag>
         )
         return (
           <Space>
             <Tag color="#2ecc71">{item.result.length}</Tag>
-            {item.result.length > 0 ? (<Link to={`/dataCollection/items?hostid=${item.result[0].hostid}`}>{"Item"}</Link>) : (null)}
+            <Link to={`/dataCollection/items?hostid=${key}`}>{"Item"}</Link>
           </Space>
         )
       }
