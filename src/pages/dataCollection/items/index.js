@@ -400,7 +400,11 @@ function Items() {
   const [ reload, setReload ] = useState(false);
   const [isModalAddShow, setIsModalAddShow] = useState(false);
   const [isModalUpdateShow, setIsModalUpdateShow] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedItem, setSelectedItem] = useState(() => {
+    return {
+      templateid: '0',
+    }
+  });
   const [type, setType] = useState(0);
 
 
@@ -428,6 +432,7 @@ function Items() {
         console.log(items)
         const dataTable = await Promise.all(items.result.map(async (item) => {
             return {
+              ...items,
                 key: item.itemid,
                 name: item.name,
                 key_: item.key_,
