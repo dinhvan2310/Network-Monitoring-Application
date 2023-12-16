@@ -285,6 +285,7 @@ function Items() {
           {
             text: 'SNMP agent',
             value: '20',
+
           },
           {
             text: 'Script',
@@ -964,6 +965,11 @@ function Items() {
               return;
             }
             const response = await itemService.getItem(selectedRowKeys[0]);
+            console.log(response)
+            if(!(response.result[0].type === '20')){
+              JSAlert.alert("Only SNMP item can be edited", "Cannot edit item");
+              return;
+            }
             if (response.error) {
               JSAlert.alert(response.error.data, response.error.message);
             } else {

@@ -4,16 +4,18 @@ import ItemListChart from 'components/ItemListChart';
 import ItemLineChart from 'components/ItemLineChart';
 const { Header, Content } = Layout;
 
-function DashboardItem({children, title, height}) {
-  console.log(height)
+function DashboardItem({children, title, scroll = false}) {
   const { token } = theme.useToken();
   const layoutStyle = {
     border: `1px solid ${token.colorBorderSecondary}`,
     borderRadius: token.borderRadiusLG,
-    overflow: 'scroll',
     backgroundColor: 'transparent',
-    height: height || 'auto',
+    
   };
+  if(scroll){
+    layoutStyle.overflowY = 'scroll';
+    layoutStyle.height = '346px';
+  }
   const contentStyle = {
     // textAlign: 'center',
     paddingInline: 12,

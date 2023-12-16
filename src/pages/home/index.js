@@ -111,7 +111,7 @@ function Home() {
     <>
       <Row gutter={[16, 24]}>
         <Col span={12}>
-          <DashboardItem title="Item List Chart" height={'346px'}>
+          <DashboardItem title="Item List Chart" scroll={true}>
             <List
               itemLayout="vertical"
               dataSource={data}
@@ -138,7 +138,7 @@ function Home() {
         </Col>
         <Col span={4}>
           <DashboardItem>
-            <ReactClock width={'100%'} height={'95%'}/>
+            <ReactClock width={'100%'} height={'95%'} />
           </DashboardItem>
         </Col>
         <Col span={8}>
