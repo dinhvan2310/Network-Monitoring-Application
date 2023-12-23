@@ -58,6 +58,20 @@ const itemService = {
             "id": 1
         })
     },
+    getItemsSNMPByHost: async (hostid) => {
+        return httpRequests.post('', {
+            "jsonrpc": "2.0",
+            "method": "item.get",
+            "params": {
+                "hostids": Array.isArray(hostid)? [...hostid] :`${hostid}`,
+                "filter": {
+                    "type": [20, 5],
+                }
+            },
+            "auth": `${localStorage.getItem("token")}`,
+            "id": 1
+        })
+    },
     getItemByTemplate: async (templateid) => {
         return httpRequests.post('', {
             "jsonrpc": "2.0",

@@ -37,6 +37,7 @@ const disableTime = (current) => {
 };
 
 const ItemLineChart = ({ item, isLabel = true }) => {
+  console.log(item)
   const [data, setData] = useState(() => {
     return {
       labels: [],

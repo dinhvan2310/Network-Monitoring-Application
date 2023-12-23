@@ -169,6 +169,7 @@ function LatestData() {
       title: "Host",
       dataIndex: "host",
       key: "host",
+      ...getColumnSearchProps("host")
     },
     {
       title: "Name",
@@ -290,7 +291,7 @@ function LatestData() {
           value: "21",
         },
       ],
-      defaultFilteredValue: [20, 5],
+      defaultFilteredValue: [20, 5, 18],
       onFilter: (value, record) => {
         return record.type === value;
       },
@@ -351,6 +352,13 @@ function LatestData() {
       title: "Change",
       dataIndex: "change",
       key: "change",
+      textWrap: "word-break",
+      ellipsis: true,
+    },
+    {
+      title: "Description",
+      dataIndex: "description",
+      key: "description",
       textWrap: "word-break",
       ellipsis: true,
     },

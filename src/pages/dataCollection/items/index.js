@@ -293,7 +293,7 @@ function Items() {
           }
         ],
         defaultFilteredValue: [
-          20, 5
+          20, 5, 18
         ],
         onFilter: (value, record) => {
           return record.type === value;
@@ -363,6 +363,13 @@ function Items() {
         },
     },
     {
+      title: "Description",
+      dataIndex: "description",
+      key: "description",
+      textWrap: "word-break",
+      ellipsis: true,
+    },
+    {
       title: "Info",
       dataIndex: "error",
       key: "error",
@@ -391,6 +398,8 @@ function Items() {
             ></Button>
           </Tooltip>
         ),
+        align: "center",
+        width: "64px",
         dataIndex: "action",
       },
   ];
@@ -432,10 +441,16 @@ function Items() {
           items = await itemService.getItemByTemplate(templateid);
         console.log(items)
         const dataTable = await Promise.all(items.result.map(async (item) => {
+          let name;
+          if(item.type === '18'){
+            name = (await itemService.getItem(item.master_itemid)).result[0].name + " ----> " + item.name;
+          } else {
+            name = item.name;
+          }
             return {
-              ...items,
+                description: item.description,
                 key: item.itemid,
-                name: item.name,
+                name: name,
                 key_: item.key_,
                 interval: item.delay === "0" ? "" : item.delay,
                 history: item.history,

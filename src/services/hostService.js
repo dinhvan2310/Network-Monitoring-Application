@@ -24,6 +24,22 @@ const hostService = {
             "id": 1
         })
     },
+    getHostByName: async (host) => {
+        return httpRequests.post('', {
+            "jsonrpc": "2.0",
+            "method": "host.get",
+            "params": {
+                "filter": {
+                    "host": [
+                        `${host}`
+                    ]
+                },
+                "selectHostGroups": "extend",
+            },
+            "auth": `${localStorage.getItem("token")}`,
+            "id": 1
+        })
+    },
     createHost: async (host) => {
         console.log(host)
         return httpRequests.post('', {

@@ -16,13 +16,14 @@ import Users from 'pages/users';
 import React from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import itemService from 'services/itemService';
+import triggerService from 'services/triggerService';
 import RequireAuth from 'utils/RequireAuth';
 
 const App = () => {
 
   const func = async () => {
-    // const response = await itemService.getItemByName("Zabbix server: Zabbix proxies stats")
-    // console.log(response)
+    const res = await triggerService.getTriggerByHost('10622')
+    console.log(res)
     
   }
 
