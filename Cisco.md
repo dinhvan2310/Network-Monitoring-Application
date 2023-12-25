@@ -3,8 +3,10 @@
 -   configure terminal 
 
 
-#   Cấu hình SNMPv1 và SNMPv2c (cần community string thôi là kết nối được với zabbix rồi)
--   snmp-server community <community-string> [view view-name] [ro | rw] [access-list-number]
+#   Cấu hình SNMPv1 và SNMPv2c 
+-   Cần community string là kết nối được với zabbix rồi
+##  Cấu hình community string
+-   snmp-server community {community-string} [view view-name] [ro | rw] [access-list-number]
     -   community string được sử dụng trong SNMPv1 và SNMPv2c.
      -  community-string: là chuỗi ký tự dùng để xác thực cho các thiết bị SNMP client. Chuỗi ký tự này phải giống nhau giữa SNMP client và SNMP server. Community string có thể là bất kỳ chuỗi ký tự nào, nhưng nên sử dụng chuỗi ký tự có độ dài từ 8 đến 20 ký tự, bao gồm cả chữ và số.
      -  [view-name] (ngoặc vuông như ri là biết thêm thôi á, tại cũng không xài): là tên của một SNMP view. Một SNMP view xác định các đối tượng SNMP mà một SNMP client có thể truy cập. Một SNMP view cũng xác định các hoạt động mà một SNMP client có thể thực hiện trên các đối tượng SNMP. Nếu không xác định view-name, community string sẽ được áp dụng cho tất cả các đối tượng SNMP. (nghĩa là hén sẽ giới hạn quyền truy cập của community string đó, nếu không xác định view-name thì sẽ cho phép truy cập tất cả các đối tượng SNMP, các đối tượng SNMP ví dụ như là systemName: .1.3.6.1.2.1.1.5.0)
@@ -25,7 +27,7 @@
 
 #  Cấu hình SNMPv3 
 -   Để cấu hình SNMPv3, mình phải cấu hình một SNMP group và một SNMP user. Một SNMP group xác định các người dùng SNMP thuộc nhóm đó. Một SNMP user xác định các thông tin xác thực và quyền truy cập của một người dùng SNMP. Một SNMP user phải thuộc một SNMP group. Một SNMP group có thể có nhiều SNMP user.
--   Cần tên user (security name) là kết nối được với zabbix rồi, ngoài có thể cần thêm password, priviledge, auth-protocol, priv-protocol nữa tuỳ vào loại xác thực và mã hóa mà mình chọn.
+-   Cần tên user (username) là kết nối được với zabbix rồi, ngoài có thể cần thêm password, priviledge, auth-protocol, priv-protocol nữa tuỳ vào loại xác thực và mã hóa mà mình chọn.
 
 ##   Cấu hình SNMP group
 -   snmp-server group {group-name} {v1 | v2c | v3} {auth | noauth | priv} [read read-view] [write write-view] [notify notify-view] [access access-list-number]
