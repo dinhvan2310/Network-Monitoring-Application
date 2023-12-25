@@ -16,6 +16,7 @@ import Users from 'pages/users';
 import React from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import itemService from 'services/itemService';
+import problemService from 'services/problemService';
 import triggerService from 'services/triggerService';
 import RequireAuth from 'utils/RequireAuth';
 
@@ -24,7 +25,10 @@ const App = () => {
   const func = async () => {
     const res = await triggerService.getTriggerByHost('10622')
     console.log(res)
-    
+    const triggerids = res.result.filter(item => item.description === 'Windows: Unavailable by ICMP ping')
+    console.log(triggerids)
+    const res2 = await problemService.getProblem(triggerids[0].triggerid)
+    console.log(res2)
   }
 
   func()
