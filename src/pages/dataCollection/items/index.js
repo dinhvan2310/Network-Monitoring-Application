@@ -285,6 +285,7 @@ function Items() {
           {
             text: 'SNMP agent',
             value: '20',
+
           },
           {
             text: 'Script',
@@ -292,7 +293,7 @@ function Items() {
           }
         ],
         defaultFilteredValue: [
-          20, 5
+          20, 5, 18
         ],
         onFilter: (value, record) => {
           return record.type === value;
@@ -362,6 +363,13 @@ function Items() {
         },
     },
     {
+      title: "Description",
+      dataIndex: "description",
+      key: "description",
+      textWrap: "word-break",
+      ellipsis: true,
+    },
+    {
       title: "Info",
       dataIndex: "error",
       key: "error",
@@ -390,6 +398,8 @@ function Items() {
             ></Button>
           </Tooltip>
         ),
+        align: "center",
+        width: "64px",
         dataIndex: "action",
       },
   ];
@@ -400,12 +410,20 @@ function Items() {
   const [ reload, setReload ] = useState(false);
   const [isModalAddShow, setIsModalAddShow] = useState(false);
   const [isModalUpdateShow, setIsModalUpdateShow] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedItem, setSelectedItem] = useState(() => {
+    return {
+      templateid: '0',
+    }
+  });
   const [type, setType] = useState(0);
 
 
   const [hostid, setHostid] = useState(() => {
     return queryString.get("hostid");
+  });
+
+  const [templateid, setTemplateid] = useState(() => {
+    return queryString.get("templateid");
   });
 
   
@@ -416,11 +434,23 @@ function Items() {
   useEffect(() => {
     const fetchData = async () => {
         setLoading(true);
-        const items = await itemService.getItemsByHost(hostid);
+        let items
+        if(hostid)
+          items = await itemService.getItemsByHost(hostid);
+        else if(templateid)
+          items = await itemService.getItemByTemplate(templateid);
+        console.log(items)
         const dataTable = await Promise.all(items.result.map(async (item) => {
+          let name;
+          if(item.type === '18'){
+            name = (await itemService.getItem(item.master_itemid)).result[0].name + " ----> " + item.name;
+          } else {
+            name = item.name;
+          }
             return {
+                description: item.description,
                 key: item.itemid,
-                name: item.name,
+                name: name,
                 key_: item.key_,
                 interval: item.delay === "0" ? "" : item.delay,
                 history: item.history,
@@ -472,27 +502,30 @@ function Items() {
             if(values.trends === "0d") values.trends = "0";
             if(values.units === undefined) values.units = "";
             if(values.description === undefined) values.description = "";
+            let response
             console.log(await hostService.getHostInterfaces(hostid))
-            values.interfaceid = (await hostService.getHostInterfaces(hostid)).result[0].interfaceid;
+            if(hostid)
+              {
+                values.interfaceid = (await hostService.getHostInterfaces(hostid)).result[0].interfaceid;
+                values.hostid = hostid;
+                response = await itemService.createItem(values);
+              }
+              else{
+                values.hostid = templateid;
+                response = await itemService.createItemWithoutInterfaceid(values);
+              }
+
             console.log(values);
-            const response = await itemService.createItem(values);
             if(response.error){
               JSAlert.alert(response.error.data, response.error.message);
             }else{
               JSAlert.alert("Update host successfully");
               setReload(!reload);
-              setIsModalUpdateShow(false);
+              setIsModalAddShow(false);
             }
           }}
           autoComplete="off"
         >
-          <Form.Item
-            name={"hostid"}
-            initialValue={hostid}
-            hidden={true}
-          >
-            <Input type="hidden"/>
-          </Form.Item>
             <Form.Item
             label="Host name"
             name={"host"}
@@ -592,6 +625,7 @@ function Items() {
                 message: "Please input update interval in format 30s,1m,2h,1d",
               }
             ]}
+            initialValue={"30s"}
           >
             <Input placeholder="30s,1m,2h,1d"/>
           </Form.Item>
@@ -608,6 +642,7 @@ function Items() {
                 message: "Please input history storage period in format 90d",
               }
             ]}
+            initialValue={"90d"}
           >
             <Input placeholder="90d"/>
           </Form.Item>
@@ -624,6 +659,7 @@ function Items() {
                 message: "Please input trend storage period in format 365d",
               }
             ]}
+            initialValue={"365d"}
           >
             <Input placeholder="365d"/>
           </Form.Item>
@@ -660,6 +696,10 @@ function Items() {
             if(values.trends === "0d") values.trends = "0";
             if(values.units === undefined) values.units = "";
             if(values.description === undefined) values.description = "";
+            if(selectedItem.templateid !== '0')
+              values.value_type = null
+            console.log(values)
+
             const response = await itemService.updateItem(values);
             if(response.error){
               JSAlert.alert(response.error.data, response.error.message);
@@ -690,7 +730,7 @@ function Items() {
             ]}
             initialValue={ selectedItem ? selectedItem.name : "" }
           >
-            <Input />
+            <Input disabled={!(selectedItem.templateid === '0')}/>
           </Form.Item>
             <Form.Item
             label="Key"
@@ -703,7 +743,7 @@ function Items() {
             ]}
             initialValue={selectedItem ? selectedItem.key_ : ""}
           >
-            <Input />
+            <Input disabled={!(selectedItem.templateid === '0')}/>
           </Form.Item>
           <Form.Item
             label="Type of information"
@@ -717,6 +757,7 @@ function Items() {
             ]}
           >
             <Select
+              disabled={!(selectedItem.templateid === '0')}
               style={{
                 width: '100%',
               }}
@@ -758,7 +799,7 @@ function Items() {
             ]}
             initialValue={selectedItem ? selectedItem.snmp_oid : ""}
           >
-            <Input />
+            <Input disabled={!(selectedItem.templateid === '0')}/>
           </Form.Item>
           {(type == 0 || type == 3) && (
             <Form.Item
@@ -766,7 +807,7 @@ function Items() {
             name={"units"}
             initialValue={selectedItem ? selectedItem.units : ""}
           >
-            <Input />
+            <Input disabled={!(selectedItem.templateid === '0')}/>
           </Form.Item>
           ) }
           <Form.Item
@@ -799,7 +840,7 @@ function Items() {
                 message: "Please input history storage period in format 90d",
               }
             ]}
-            initialValue={selectedItem ? selectedItem.history : ""}
+            initialValue={selectedItem ? (selectedItem.history === '0' ? '0d' : selectedItem.history) : ""}
           >
             <Input placeholder="90d"/>
           </Form.Item>
@@ -816,7 +857,7 @@ function Items() {
                 message: "Please input trend storage period in format 365d",
               }
             ]}
-            initialValue={selectedItem ? selectedItem.trends : ""}
+            initialValue={selectedItem ? (selectedItem.trends === '0' ? '0d' : selectedItem.trends) : ""}
           >
             <Input placeholder="365d"/>
           </Form.Item>
@@ -925,10 +966,11 @@ function Items() {
         </Button>
         </Popconfirm>
         
-        <Popconfirm
-          title={`Are you sure to delete ${selectedRowKeys.length} items?`}
-          description="This action cannot be undone."
-          onConfirm={async () => {
+          <Button
+          type="primary"
+          ghost
+          disabled={selectedRowKeys.length > 0 ? false : true}
+          onClick={async () => {
             if (selectedRowKeys.length > 1) {
               JSAlert.alert("Please select only one host to edit");
               return;
@@ -938,6 +980,11 @@ function Items() {
               return;
             }
             const response = await itemService.getItem(selectedRowKeys[0]);
+            console.log(response)
+            if(!(response.result[0].type === '20')){
+              JSAlert.alert("Only SNMP item can be edited", "Cannot edit item");
+              return;
+            }
             if (response.error) {
               JSAlert.alert(response.error.data, response.error.message);
             } else {
@@ -946,17 +993,9 @@ function Items() {
               setIsModalUpdateShow(true);
             }
           }}
-          okText="Yes"
-          cancelText="No"
-        >
-          <Button
-          type="primary"
-          ghost
-          disabled={selectedRowKeys.length > 0 ? false : true}
         >
           Edit
         </Button>
-        </Popconfirm>
         
       </Space>
     </>

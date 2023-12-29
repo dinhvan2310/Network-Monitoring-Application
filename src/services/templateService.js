@@ -6,7 +6,7 @@ const templateService = {
             "jsonrpc": "2.0",
             "method": "template.get",
             "params": {
-                
+                "selectTemplateGroups": "extend",
             },
             "auth": `${localStorage.getItem("token")}`,
             "id": 1
@@ -78,12 +78,36 @@ const templateService = {
             "id": 1
         })
     },
+    createTempalteGroup: async (name) => {
+        return httpRequests.post('', {
+            "jsonrpc": "2.0",
+            "method": "templategroup.create",
+            "params": {
+                "name": `${name}`
+            },
+            "auth": `${localStorage.getItem("token")}`,
+            "id": 1
+        })
+    },
     createTempalte: async (template) => {
         return httpRequests.post('', {
             "jsonrpc": "2.0",
             "method": "template.create",
             "params": {
                 "host": `${template.host}`,
+                "groups": template.groups,
+            },
+            "auth": `${localStorage.getItem("token")}`,
+            "id": 1
+        })
+    },
+    updateTemplate: async (templateid, template) => {
+        return httpRequests.post('', {
+            "jsonrpc": "2.0",
+            "method": "template.update",
+            "params": {
+                "templateid": `${templateid}`,
+                "name": `${template.host}`,
                 "groups": template.groups,
             },
             "auth": `${localStorage.getItem("token")}`,
@@ -102,26 +126,8 @@ const templateService = {
             "id": 1
         })
     },
-    addTemplate: async(host,groupid,templateid,description) =>{
-        return httpRequests.post('',{
-            "jsonrpc" : "2.0",
-            "method":"template.create",
-            "params":{
-                "host":`${host}`,
-                "groups":{
-                    "groupid":`${groupid}`,
-                },
-                "templates":[
-                    {
-                        "templateid":`${templateid}`,
-                    }
-                ],
-                "description":`${description}`,
-        },
-           "auth":`${localStorage.getItem("token")}`,
-            "id": 1
-        })
-    },
+    
+
 }
 
 export default templateService

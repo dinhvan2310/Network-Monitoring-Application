@@ -210,7 +210,11 @@ function HostGroups() {
   };
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalUpdateOpen, setIsModalUpdateOpen] = useState(false);
-  const [selectedHostGroup, setSelectedHostGroup] = useState(null);//{key: 1, name: "test", hosts: []}
+  const [selectedHostGroup, setSelectedHostGroup] = useState(() => {
+    return {
+      name: "",
+    }
+  });//{key: 1, name: "test", hosts: []}
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const rowSelection = {
     selectedRowKeys,
@@ -221,6 +225,7 @@ function HostGroups() {
   return (
     <>
     <Modal
+    destroyOnClose={true}
         title="Host Group"
         open={isModalUpdateOpen}
         onOk={() => {}}
@@ -271,13 +276,16 @@ function HostGroups() {
                 required: true,
                 message: "Please input your groupName!",
               },
-            ]}>
+            ]}
+            initialValue={selectedHostGroup.name}
+            >
             <Input />
           </Form.Item>
           <Button type="primary" htmlType="submit" >Update</Button>
         </Form>
       </Modal>
       <Modal
+      destroyOnClose={true}
         title="Create Host Group"
         open={isModalOpen}
         onOk={() => {}}
@@ -316,7 +324,7 @@ function HostGroups() {
           <Form.Item style={{marginTop: "24px"}} label="Group Name" name="groupName" rules={[
               {
                 required: true,
-                message: "Please input your username!",
+                message: "Please input your group name!",
               },
             ]}>
             <Input />

@@ -10,19 +10,24 @@ import {
   Tooltip,
   TreeSelect,
 } from "antd";
-import { PlusOutlined, SearchOutlined, InfoCircleOutlined } from "@ant-design/icons";
-import Highlighter from 'react-highlight-words';
+import {
+  PlusOutlined,
+  SearchOutlined,
+  InfoCircleOutlined,
+} from "@ant-design/icons";
+import Highlighter from "react-highlight-words";
 import JSAlert from "js-alert";
 import { useEffect, useRef, useState } from "react";
 import hostService from "services/hostService";
 import templateService from "services/templateService";
 import itemService from "services/itemService";
 import { Link } from "react-router-dom";
+import { key } from "localforage";
 
 function Hosts() {
   //
-  const [searchText, setSearchText] = useState('');
-  const [searchedColumn, setSearchedColumn] = useState('');
+  const [searchText, setSearchText] = useState("");
+  const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef(null);
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -31,10 +36,16 @@ function Hosts() {
   };
   const handleReset = (clearFilters) => {
     clearFilters();
-    setSearchText('');
+    setSearchText("");
   };
   const getColumnSearchProps = (dataIndex) => ({
-    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
+    filterDropdown: ({
+      setSelectedKeys,
+      selectedKeys,
+      confirm,
+      clearFilters,
+      close,
+    }) => (
       <div
         style={{
           padding: 8,
@@ -45,11 +56,13 @@ function Hosts() {
           ref={searchInput}
           placeholder={`Search ${dataIndex}`}
           value={selectedKeys[0]}
-          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+          onChange={(e) =>
+            setSelectedKeys(e.target.value ? [e.target.value] : [])
+          }
           onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
           style={{
             marginBottom: 8,
-            display: 'block',
+            display: "block",
           }}
         />
         <Space>
@@ -101,7 +114,7 @@ function Hosts() {
     filterIcon: (filtered) => (
       <SearchOutlined
         style={{
-          color: filtered ? '#1677ff' : undefined,
+          color: filtered ? "#1677ff" : undefined,
         }}
       />
     ),
@@ -116,12 +129,12 @@ function Hosts() {
       searchedColumn === dataIndex ? (
         <Highlighter
           highlightStyle={{
-            backgroundColor: '#ffc069',
+            backgroundColor: "#ffc069",
             padding: 0,
           }}
           searchWords={[searchText]}
           autoEscape
-          textToHighlight={text ? text.toString() : ''}
+          textToHighlight={text ? text.toString() : ""}
         />
       ) : (
         text
@@ -133,7 +146,7 @@ function Hosts() {
       title: "Name",
       dataIndex: "name",
       key: "name",
-      ...getColumnSearchProps('name'),
+      ...getColumnSearchProps("name"),
     },
     {
       title: "Interfaces",
@@ -143,17 +156,15 @@ function Hosts() {
     {
       title: "Item",
       key: "item",
-      render: ({item}) => {
-        if(!item) return (
-          <Tag color="#2ecc71">0</Tag>
-        )
+      render: ({ item, key }) => {
+        if (!item) return <Tag color="#2ecc71">0</Tag>;
         return (
           <Space>
             <Tag color="#2ecc71">{item.result.length}</Tag>
-            {item.result.length > 0 ? (<Link to={`/dataCollection/items?hostid=${item.result[0].hostid}`}>{"Item"}</Link>) : (null)}
+            <Link to={`/dataCollection/items?hostid=${key}`}>{"Item"}</Link>
           </Space>
-        )
-      }
+        );
+      },
     },
     {
       title: "Status",
@@ -264,7 +275,10 @@ function Hosts() {
     setTreeDataHostGroup(treeDataTemp);
   };
 
-  const [version, setVersion] = useState(null);
+  const [version, setVersion] = useState(2);
+  const [SMNPv3Version, setSMNPv3Version] = useState(0);
+  const [auth, setAuth] = useState(0);
+  const [priv, setPriv] = useState(0);
   const [reLoad, setReLoad] = useState(false);
   const [value, setValue] = useState();
 
@@ -288,7 +302,7 @@ function Hosts() {
 
       const hostInterfaces = hosts.result.map(async (host) => {
         const hostInterfaces = await hostService.getHostInterfaces(host.hostid);
-        console.log(await itemService.getItemsByHost(host.hostid))
+        console.log(await itemService.getItemsByHost(host.hostid));
         const item = await itemService.getItemsByHost(host.hostid);
         return {
           key: host.hostid,
@@ -336,7 +350,12 @@ function Hosts() {
       <Modal
         title="Add host"
         open={isModalAddHostShown}
-        onCancel={() => setIsModalAddHostShown(false)}
+        onCancel={() => {
+          setVersion(2);
+          setSMNPv3Version(0);
+          setIsModalAddHostShown(false)
+        }}
+        destroyOnClose={true}
         footer={null}
         // onOk={async () => {
 
@@ -347,63 +366,65 @@ function Hosts() {
           name="addhost"
           labelCol={{ span: 6 }}
           wrapperCol={{ span: 16 }}
-          style={{ maxWidth: 800 }}
           initialValues={{}}
           onFinish={async (values) => {
             let response;
+            let host = {
+              host: `${values.host}`,
+                interfaces: [
+                  {
+                    type: 2,
+                    main: 1,
+                    useip: 1,
+                    ip: `${values.ip}`,
+                    dns: "",
+                    port: `${values.port}`,
+                    details: {
+                      version: `${values.version}`,
+                      bulk: 1,
+                      community: `${values.community}`,
+                    },
+                  },
+                ],
+                groups: [
+                  {
+                    groupid: `${values.groupid}`,
+                  },
+                ]
+            }
+
+            if (values.version === 3) {
+              host.interfaces[0].details = {
+                version: `${values.version}`,
+                bulk: 1,
+                contextname: `${values.contextname}`,
+                securitylevel: `${values.securitylevel}`,
+                securityname: `${values.securityname}`,
+              };
+              if (values.securitylevel === 1) {
+                host.interfaces[0].details.authprotocol = `${values.authprotocol}`;
+                host.interfaces[0].details.authpassphrase = `${values.authpassphrase}`;
+              }
+              if (values.securitylevel === 2) {
+                host.interfaces[0].details.authprotocol = `${values.authprotocol}`;
+                host.interfaces[0].details.authpassphrase = `${values.authpassphrase}`;
+                host.interfaces[0].details.privprotocol = `${values.privprotocol}`;
+                host.interfaces[0].details.privpassphrase = `${values.privpassphrase}`;
+              }
+            }
+            console.log(host)
             if (values.templateid) {
-              response = await hostService.createHost({
-                host: `${values.host}`,
-                interfaces: [
-                  {
-                    type: 2,
-                    main: 1,
-                    useip: 1,
-                    ip: `${values.ip}`,
-                    dns: "",
-                    port: `${values.port}`,
-                    details: {
-                      version: `${values.version}`,
-                      bulk: 1,
-                      community: `${values.community}`,
-                    },
-                  },
-                ],
-                groups: [
-                  {
-                    groupid: `${values.groupid}`,
-                  },
-                ],
-                templates: [
-                  {
-                    templateid: `${values.templateid}`,
-                  },
-                ],
-              });
+              host.templates = [
+                {
+                  templateid: `${values.templateid}`,
+                }
+              ]
+              console.log(host)
+              response = await hostService.createHost(host);
             } else {
-              response = await hostService.createHost({
-                host: `${values.host}`,
-                interfaces: [
-                  {
-                    type: 2,
-                    main: 1,
-                    useip: 1,
-                    ip: `${values.ip}`,
-                    dns: "",
-                    port: `${values.port}`,
-                    details: {
-                      version: `${values.version}`,
-                      bulk: 1,
-                      community: `${values.community}`,
-                    },
-                  },
-                ],
-                groups: [
-                  {
-                    groupid: `${values.groupid}`,
-                  },
-                ],
-              });
+              response = await hostService.createHost(
+                host
+              );
             }
             if (response.error) {
               JSAlert.alert(response.error.data, response.error.message);
@@ -416,7 +437,9 @@ function Hosts() {
                   name: values.host,
                   interfaces: values.ip + " : " + values.port,
                   status: 1,
-                  item: await itemService.getItemsByHost(response.result.hostids[0]),
+                  item: await itemService.getItemsByHost(
+                    response.result.hostids[0]
+                  ),
                   hostInterfaces: {
                     result: [
                       {
@@ -517,9 +540,9 @@ function Hosts() {
                 message: "Please input snmp version",
               },
             ]}
+            initialValue={version}
           >
             <Select
-              // defaultValue={2}
               style={{
                 width: 120,
               }}
@@ -553,7 +576,154 @@ function Hosts() {
               <Input />
             </Form.Item>
           ) : version === 3 ? (
-            <h1>Version3</h1>
+            <>
+              <Form.Item
+                label="Security level"
+                name={"securitylevel"}
+                initialValue={SMNPv3Version}
+              >
+                <Select
+                  style={{
+                    width: 120,
+                  }}
+                  onChange={(value) => {
+                    setSMNPv3Version(value);
+                  }}
+                  options={[
+                    {
+                      value: 0,
+                      label: "noAuthNoPriv",
+                    },
+                    {
+                      value: 1,
+                      label: "authNoPriv",
+                    },
+                    {
+                      value: 2,
+                      label: "authPriv",
+                    },
+                  ]}
+                />
+              </Form.Item>
+              <>
+                  <Form.Item
+                    label="Context name"
+                    name={"contextname"}
+                    initialValue={""}
+                  >
+                    <Input />
+                  </Form.Item>
+                  <Form.Item
+                    label="Security name"
+                    name={"securityname"}
+                    initialValue={""}
+                  >
+                    <Input />
+                  </Form.Item>
+                </>
+              {SMNPv3Version !== 0 ? (
+                <>
+                  <Form.Item
+                label="Auth protocol"
+                name={"authprotocol"}
+                initialValue={auth}
+              >
+                <Select
+                  style={{
+                    width: 120,
+                  }}
+                  onChange={(value) => {
+                    setAuth(value);
+                  }}
+                  options={[
+                    {
+                      value: 0,
+                      label: "MD5",
+                    },
+                    {
+                      value: 1,
+                      label: "SHA1",
+                    },
+                    {
+                      value: 2,
+                      label: "SHA224",
+                    },
+                    {
+                      value: 3,
+                      label: "SHA256",
+                    },
+                    {
+                      value: 4,
+                      label: "SHA384",
+                    },
+                    {
+                      value: 5,
+                      label: "SHA512",
+                    }
+                  ]}
+                />
+              </Form.Item>
+              <Form.Item
+                label="Auth pass"
+                name={"authpassphrase"}
+                initialValue={""}
+              >
+                <Input />
+              </Form.Item>
+                </>
+              ) : null}
+              {SMNPv3Version === 2 ? (
+                <>
+                  <Form.Item
+                label="Priv protocol"
+                name={"privprotocol"}
+                initialValue={priv}
+              >
+                <Select
+                  style={{
+                    width: 120,
+                  }}
+                  onChange={(value) => {
+                    setAuth(value);
+                  }}
+                  options={[
+                    {
+                      value: 0,
+                      label: "DES",
+                    },
+                    {
+                      value: 1,
+                      label: "AES128",
+                    },
+                    {
+                      value: 2,
+                      label: "AES192",
+                    },
+                    {
+                      value: 3,
+                      label: "AES256",
+                    },
+                    {
+                      value: 4,
+                      label: "AES192C",
+                    },
+                    {
+                      value: 5,
+                      label: "AES256C",
+                    }
+                  ]}
+                />
+              </Form.Item>
+              <Form.Item
+                label="Priv pass"
+                name={"privpassphrase"}
+                initialValue={""}
+              >
+                <Input />
+              </Form.Item>
+                </>
+              ) : null}
+            </>
           ) : null}
 
           <Button type="primary" htmlType="submit">
@@ -577,29 +747,27 @@ function Hosts() {
             let host = {
               hostid: `${selectedHost.result[0].hostid}`,
               host: `${values.host}`,
-            }
-            if(values.templateid){
-              host.templates = values.templateid.map(id => {
+            };
+            if (values.templateid) {
+              host.templates = values.templateid.map((id) => {
                 return {
-                  templateid: id
-                }
-              })
+                  templateid: id,
+                };
+              });
             }
-            if(values.groupid){
-              host.groups = values.groupid.map(id => {
+            if (values.groupid) {
+              host.groups = values.groupid.map((id) => {
                 return {
-                  groupid: id
-                }
-              })
-                
-              ;
+                  groupid: id,
+                };
+              });
             }
-            console.log(host)
+            console.log(host);
 
             const response = await hostService.updateHost(host);
-            if(response.error){
+            if (response.error) {
               JSAlert.alert(response.error.data, response.error.message);
-            }else{
+            } else {
               JSAlert.alert("Update host successfully");
               setDataSource(
                 dataSource.map((host) => {
@@ -611,7 +779,6 @@ function Hosts() {
               );
               setIsModalShown(false);
             }
-
           }}
           autoComplete="off"
         >
@@ -633,9 +800,13 @@ function Hosts() {
               showSearch
               multiple
               style={{ width: "100%" }}
-              defaultValue={selectedHost ? selectedHost.templates.result.map((template) => {
-                return template.templateid
-              }) : []}        
+              defaultValue={
+                selectedHost
+                  ? selectedHost.templates.result.map((template) => {
+                      return template.templateid;
+                    })
+                  : []
+              }
               dropdownStyle={{ maxHeight: 1000, overflow: "auto" }}
               placeholder="Please select"
               allowClear
@@ -677,7 +848,7 @@ function Hosts() {
                 return {
                   value: group.value,
                   label: group.title,
-                }
+                };
               })}
             />
           </Form.Item>
@@ -861,11 +1032,12 @@ function Hosts() {
             );
             console.log(hostSelected);
             setSelectedHost(hostSelected);
-            setValue(hostSelected.templates.result.map((template) => {
-              return template.templateid
-            }))
+            setValue(
+              hostSelected.templates.result.map((template) => {
+                return template.templateid;
+              })
+            );
 
-            
             await loadTreeDataHostGroup();
             await loadTreeData();
             setIsModalShown(true);
@@ -873,7 +1045,6 @@ function Hosts() {
         >
           Edit
         </Button>
-        
       </Space>
     </>
   );
