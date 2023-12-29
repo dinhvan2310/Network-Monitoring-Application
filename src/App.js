@@ -31,7 +31,7 @@ const App = () => {
     console.log(res2)
   }
 
-  func()
+  // func()
 
 
   return (

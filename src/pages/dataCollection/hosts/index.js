@@ -276,7 +276,9 @@ function Hosts() {
   };
 
   const [version, setVersion] = useState(2);
-  const [SMNPv3Version, setSMNPv3Version] = useState(1);
+  const [SMNPv3Version, setSMNPv3Version] = useState(0);
+  const [auth, setAuth] = useState(0);
+  const [priv, setPriv] = useState(0);
   const [reLoad, setReLoad] = useState(false);
   const [value, setValue] = useState();
 
@@ -364,63 +366,65 @@ function Hosts() {
           name="addhost"
           labelCol={{ span: 6 }}
           wrapperCol={{ span: 16 }}
-          style={{ maxWidth: 800 }}
           initialValues={{}}
           onFinish={async (values) => {
             let response;
+            let host = {
+              host: `${values.host}`,
+                interfaces: [
+                  {
+                    type: 2,
+                    main: 1,
+                    useip: 1,
+                    ip: `${values.ip}`,
+                    dns: "",
+                    port: `${values.port}`,
+                    details: {
+                      version: `${values.version}`,
+                      bulk: 1,
+                      community: `${values.community}`,
+                    },
+                  },
+                ],
+                groups: [
+                  {
+                    groupid: `${values.groupid}`,
+                  },
+                ]
+            }
+
+            if (values.version === 3) {
+              host.interfaces[0].details = {
+                version: `${values.version}`,
+                bulk: 1,
+                contextname: `${values.contextname}`,
+                securitylevel: `${values.securitylevel}`,
+                securityname: `${values.securityname}`,
+              };
+              if (values.securitylevel === 1) {
+                host.interfaces[0].details.authprotocol = `${values.authprotocol}`;
+                host.interfaces[0].details.authpassphrase = `${values.authpassphrase}`;
+              }
+              if (values.securitylevel === 2) {
+                host.interfaces[0].details.authprotocol = `${values.authprotocol}`;
+                host.interfaces[0].details.authpassphrase = `${values.authpassphrase}`;
+                host.interfaces[0].details.privprotocol = `${values.privprotocol}`;
+                host.interfaces[0].details.privpassphrase = `${values.privpassphrase}`;
+              }
+            }
+            console.log(host)
             if (values.templateid) {
-              response = await hostService.createHost({
-                host: `${values.host}`,
-                interfaces: [
-                  {
-                    type: 2,
-                    main: 1,
-                    useip: 1,
-                    ip: `${values.ip}`,
-                    dns: "",
-                    port: `${values.port}`,
-                    details: {
-                      version: `${values.version}`,
-                      bulk: 1,
-                      community: `${values.community}`,
-                    },
-                  },
-                ],
-                groups: [
-                  {
-                    groupid: `${values.groupid}`,
-                  },
-                ],
-                templates: [
-                  {
-                    templateid: `${values.templateid}`,
-                  },
-                ],
-              });
+              host.templates = [
+                {
+                  templateid: `${values.templateid}`,
+                }
+              ]
+              console.log(host)
+              response = await hostService.createHost(host);
             } else {
-              response = await hostService.createHost({
-                host: `${values.host}`,
-                interfaces: [
-                  {
-                    type: 2,
-                    main: 1,
-                    useip: 1,
-                    ip: `${values.ip}`,
-                    dns: "",
-                    port: `${values.port}`,
-                    details: {
-                      version: `${values.version}`,
-                      bulk: 1,
-                      community: `${values.community}`,
-                    },
-                  },
-                ],
-                groups: [
-                  {
-                    groupid: `${values.groupid}`,
-                  },
-                ],
-              });
+              response = await hostService.createHost(
+                host
+              );
             }
             if (response.error) {
               JSAlert.alert(response.error.data, response.error.message);
@@ -575,7 +579,7 @@ function Hosts() {
             <>
               <Form.Item
                 label="Security level"
-                name={"securityLevel"}
+                name={"securitylevel"}
                 initialValue={SMNPv3Version}
               >
                 <Select
@@ -601,22 +605,122 @@ function Hosts() {
                   ]}
                 />
               </Form.Item>
-              {SMNPv3Version === 0 ? (
-                <>
+              <>
                   <Form.Item
                     label="Context name"
-                    name={"contextName"}
+                    name={"contextname"}
                     initialValue={""}
                   >
                     <Input />
                   </Form.Item>
                   <Form.Item
                     label="Security name"
-                    name={"securityName"}
+                    name={"securityname"}
                     initialValue={""}
                   >
                     <Input />
                   </Form.Item>
+                </>
+              {SMNPv3Version !== 0 ? (
+                <>
+                  <Form.Item
+                label="Auth protocol"
+                name={"authprotocol"}
+                initialValue={auth}
+              >
+                <Select
+                  style={{
+                    width: 120,
+                  }}
+                  onChange={(value) => {
+                    setAuth(value);
+                  }}
+                  options={[
+                    {
+                      value: 0,
+                      label: "MD5",
+                    },
+                    {
+                      value: 1,
+                      label: "SHA1",
+                    },
+                    {
+                      value: 2,
+                      label: "SHA224",
+                    },
+                    {
+                      value: 3,
+                      label: "SHA256",
+                    },
+                    {
+                      value: 4,
+                      label: "SHA384",
+                    },
+                    {
+                      value: 5,
+                      label: "SHA512",
+                    }
+                  ]}
+                />
+              </Form.Item>
+              <Form.Item
+                label="Auth pass"
+                name={"authpassphrase"}
+                initialValue={""}
+              >
+                <Input />
+              </Form.Item>
+                </>
+              ) : null}
+              {SMNPv3Version === 2 ? (
+                <>
+                  <Form.Item
+                label="Priv protocol"
+                name={"privprotocol"}
+                initialValue={priv}
+              >
+                <Select
+                  style={{
+                    width: 120,
+                  }}
+                  onChange={(value) => {
+                    setAuth(value);
+                  }}
+                  options={[
+                    {
+                      value: 0,
+                      label: "DES",
+                    },
+                    {
+                      value: 1,
+                      label: "AES128",
+                    },
+                    {
+                      value: 2,
+                      label: "AES192",
+                    },
+                    {
+                      value: 3,
+                      label: "AES256",
+                    },
+                    {
+                      value: 4,
+                      label: "AES192C",
+                    },
+                    {
+                      value: 5,
+                      label: "AES256C",
+                    }
+                  ]}
+                />
+              </Form.Item>
+              <Form.Item
+                label="Priv pass"
+                name={"privpassphrase"}
+                initialValue={""}
+              >
+                <Input />
+              </Form.Item>
                 </>
               ) : null}
             </>
