@@ -154,7 +154,7 @@ function Templates() {
           key: template.templateid,
           name: template.name,
           item: items,
-          triggers: triggers.result.length,
+          trigger: triggers,
           vendor: template.vendor_name,
           version: template.vendor_version,
           templategroups: template.templategroups,
@@ -189,9 +189,18 @@ function Templates() {
       },
     },
     {
-      title: "Triggers",
-      dataIndex: "triggers",
-      key: "triggers",
+      title: "Trigger",
+      key: "trigger",
+      render: ({ trigger, key }) => {
+        console.log(trigger);
+        if (!trigger) return <Tag color="#2ecc71">0</Tag>;
+        return (
+          <Space>
+            <Tag color="#2ecc71">{trigger.result.length}</Tag>
+            <Link to={`/dataCollection/trigger?hostid=${key}`}>{"Trigger"}</Link>
+          </Space>
+        );
+      },
     },
     {
       title: "Vendor",

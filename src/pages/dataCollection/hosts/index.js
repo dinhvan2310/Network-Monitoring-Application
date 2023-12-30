@@ -23,6 +23,7 @@ import templateService from "services/templateService";
 import itemService from "services/itemService";
 import { Link } from "react-router-dom";
 import { key } from "localforage";
+import triggerService from "services/triggerService";
 
 function Hosts() {
   //
@@ -39,6 +40,7 @@ function Hosts() {
     setSearchText("");
   };
   const getColumnSearchProps = (dataIndex) => ({
+    
     filterDropdown: ({
       setSelectedKeys,
       selectedKeys,
@@ -162,6 +164,19 @@ function Hosts() {
           <Space>
             <Tag color="#2ecc71">{item.result.length}</Tag>
             <Link to={`/dataCollection/items?hostid=${key}`}>{"Item"}</Link>
+          </Space>
+        );
+      },
+    },
+    {
+      title: "Trigger",
+      key: "trigger",
+      render: ({ trigger, key }) => {
+        if (!trigger) return <Tag color="#2ecc71">0</Tag>;
+        return (
+          <Space>
+            <Tag color="#2ecc71">{trigger.result.length}</Tag>
+            <Link to={`/dataCollection/trigger?hostid=${key}`}>{"Trigger"}</Link>
           </Space>
         );
       },
@@ -304,6 +319,8 @@ function Hosts() {
         const hostInterfaces = await hostService.getHostInterfaces(host.hostid);
         console.log(await itemService.getItemsByHost(host.hostid));
         const item = await itemService.getItemsByHost(host.hostid);
+        const trigger = await triggerService.getTriggerByHost(host.hostid);
+        console.log(trigger)
         return {
           key: host.hostid,
           name: host.name,
@@ -313,6 +330,7 @@ function Hosts() {
               hostInterfaces.result[0].port
             : "",
           item: item,
+          trigger: trigger,
           status: host.status,
           hostInterfaces: hostInterfaces,
           type: hostInterfaces.result[0] ? hostInterfaces.result[0].type : "",

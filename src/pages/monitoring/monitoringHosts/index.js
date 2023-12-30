@@ -1,16 +1,16 @@
-import { Button, Space, Table, Tag, Input } from "antd";
-import { SearchOutlined } from "@ant-design/icons";
-import Highlighter from 'react-highlight-words';
-import JSAlert from "js-alert";
+import { Button, Space, Table, Tag, Input, Badge, Avatar } from "antd";
+import { SearchOutlined, ExclamationCircleOutlined  } from "@ant-design/icons";
+import Highlighter from "react-highlight-words";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import hostService from "services/hostService";
 import itemService from "services/itemService";
+import Problem from "components/Problem";
+import problemService from "services/problemService";
 
 function MonitoringHost() {
-  //
-  const [searchText, setSearchText] = useState('');
-  const [searchedColumn, setSearchedColumn] = useState('');
+  const [searchText, setSearchText] = useState("");
+  const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef(null);
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -19,10 +19,16 @@ function MonitoringHost() {
   };
   const handleReset = (clearFilters) => {
     clearFilters();
-    setSearchText('');
+    setSearchText("");
   };
   const getColumnSearchProps = (dataIndex) => ({
-    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
+    filterDropdown: ({
+      setSelectedKeys,
+      selectedKeys,
+      confirm,
+      clearFilters,
+      close,
+    }) => (
       <div
         style={{
           padding: 8,
@@ -33,11 +39,13 @@ function MonitoringHost() {
           ref={searchInput}
           placeholder={`Search ${dataIndex}`}
           value={selectedKeys[0]}
-          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+          onChange={(e) =>
+            setSelectedKeys(e.target.value ? [e.target.value] : [])
+          }
           onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
           style={{
             marginBottom: 8,
-            display: 'block',
+            display: "block",
           }}
         />
         <Space>
@@ -89,7 +97,7 @@ function MonitoringHost() {
     filterIcon: (filtered) => (
       <SearchOutlined
         style={{
-          color: filtered ? '#1677ff' : undefined,
+          color: filtered ? "#1677ff" : undefined,
         }}
       />
     ),
@@ -104,12 +112,12 @@ function MonitoringHost() {
       searchedColumn === dataIndex ? (
         <Highlighter
           highlightStyle={{
-            backgroundColor: '#ffc069',
+            backgroundColor: "#ffc069",
             padding: 0,
           }}
           searchWords={[searchText]}
           autoEscape
-          textToHighlight={text ? text.toString() : ''}
+          textToHighlight={text ? text.toString() : ""}
         />
       ) : (
         text
@@ -120,7 +128,7 @@ function MonitoringHost() {
       title: "Name",
       dataIndex: "name",
       key: "name",
-      ...getColumnSearchProps('name'),
+      ...getColumnSearchProps("name"),
     },
     {
       title: "Interfaces",
@@ -157,14 +165,31 @@ function MonitoringHost() {
     {
       title: "Latest data",
       key: "latestData",
-      render: ({latestData}) => {
-        console.log(latestData.latestData.length)
-        console.log(latestData.hostid)
+      render: ({ latestData }) => {
+        console.log(latestData.latestData.length);
+        console.log(latestData.hostid);
         return (
-        <Space>
-            <Link to={`/monitoring/latestData?hostid=${latestData.hostid}`}>Latest data</Link>
+          <Space>
+            <Link to={`/monitoring/latestData?hostid=${latestData.hostid}`}>
+              Latest data
+            </Link>
             <Tag color="#2ecc71">{latestData.latestData.length}</Tag>
-        </Space>)
+          </Space>
+        );
+      },
+    },
+    {
+      title: "Problems",
+      key: "problems",
+      
+      render: ({ problems }) => {
+        return (
+          <Space>
+            <Badge count={problems.length} showZero  >
+              <Avatar  size="default" icon={<ExclamationCircleOutlined />}/>
+            </Badge>
+          </Space>
+        );
       },
     },
     {
@@ -195,6 +220,10 @@ function MonitoringHost() {
         const hostInterfaces = await hostService.getHostInterfaces(host.hostid);
         const items = await itemService.getItemsByHost(host.hostid);
         console.log(items);
+
+        const problems = await problemService.getProblemByHost(host.hostid);
+        console.log(problems);
+
         return {
           key: host.hostid,
           name: host.name,
@@ -205,8 +234,9 @@ function MonitoringHost() {
             : "",
           status: host.status,
           hostInterfaces: hostInterfaces,
-          latestData: {latestData: items.result, hostid: host.hostid},
-          type: hostInterfaces.result? hostInterfaces.result[0].type : "",
+          latestData: { latestData: items.result, hostid: host.hostid },
+          type: hostInterfaces.result ? hostInterfaces.result[0].type : "",
+          problems: problems.result,
         };
       });
       const hostsData = await Promise.all(hostInterfaces);
@@ -235,6 +265,14 @@ function MonitoringHost() {
         columns={columns}
         dataSource={dataSource}
         loading={loading}
+        expandable={{
+          expandedRowRender: (item) => {
+            return <Problem item={item} />;
+          },
+          rowExpandable: (item) => {
+            return item.problems.length > 0;
+          },
+        }}
       />
     </>
   );

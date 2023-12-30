@@ -20,6 +20,23 @@ import itemService from "services/itemService";
 import ItemLineChart from "components/ItemLineChart";
 import ItemListChart from "components/ItemListChart";
 
+function formatTimeTicks(timeTicks) {
+  // Chuyển đổi TimeTicks thành milliseconds
+  var milliseconds = timeTicks * 10; // Một TimeTick tương đương với 0.01 giây (10 milliseconds)
+
+  // Tạo đối tượng Date từ milliseconds
+  var date = new Date(milliseconds);
+
+  // Lấy ngày, giờ, phút và giây từ đối tượng Date
+  var days = Math.floor(milliseconds / (24 * 60 * 60 * 1000));
+  var hours = date.getUTCHours();
+  var minutes = date.getUTCMinutes();
+  var seconds = date.getUTCSeconds();
+
+  // Trả về chuỗi định dạng ngày/giờ/phút/giây
+  return days + "d " + hours + "h " + minutes + "m " + seconds + "s";
+}
+
 const ItemValueType = {
   0: "Numeric (float)",
   3: "Numeric (unsigned)",
@@ -449,6 +466,23 @@ function LatestData() {
       console.log(response);
       const data = response.result.map(async (item) => {
         let change = null;
+        if(item.units === 'uptime') {
+          console.log(item)
+          console.log(item.lastvalue)
+          item.lastvalue = formatTimeTicks(item.lastvalue*100);
+          item.value_type = 4;
+          console.log(item.lastvalue)
+        } 
+        if(item.units === 'B') {
+          item.lastvalue = (item.lastvalue/1024/1024/1024);
+          item.prevvalue = (item.prevvalue/1024/1024/1024);
+          item.units = 'GB';
+        }
+        if(item.units === 'bps') {
+          item.lastvalue = (item.lastvalue/1024/1024);
+          item.prevvalue = (item.prevvalue/1024/1024);
+          item.units = 'Mbps';
+        }
         let value = item.lastvalue;
         if (
           item.lastvalue === "0" &&

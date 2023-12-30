@@ -4,6 +4,7 @@ import Hosts from 'pages/dataCollection/hosts';
 import Items from 'pages/dataCollection/items';
 import TemplateGroups from 'pages/dataCollection/templateGroups';
 import Templates from 'pages/dataCollection/templates';
+import Trigger from 'pages/dataCollection/trigger';
 import Home from 'pages/home';
 import Login from 'pages/login';
 import ItemGraph from 'pages/monitoring/graph';
@@ -18,20 +19,17 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import itemService from 'services/itemService';
 import problemService from 'services/problemService';
 import triggerService from 'services/triggerService';
+import userService from 'services/userService';
 import RequireAuth from 'utils/RequireAuth';
 
 const App = () => {
 
   const func = async () => {
-    const res = await triggerService.getTriggerByHost('10622')
+    const res = await userService.test()
     console.log(res)
-    const triggerids = res.result.filter(item => item.description === 'Windows: Unavailable by ICMP ping')
-    console.log(triggerids)
-    const res2 = await problemService.getProblem(triggerids[0].triggerid)
-    console.log(res2)
   }
 
-  // func()
+  func()
 
 
   return (
@@ -45,6 +43,7 @@ const App = () => {
           <Route path="/monitoring/graph" element={<RequireAuth><ItemGraph/></RequireAuth>} />
           <Route path="/dataCollection/hosts" element={<RequireAuth><Hosts/></RequireAuth>} />
           <Route path="/dataCollection/items" element={<RequireAuth><Items/></RequireAuth>} />
+          <Route path="/dataCollection/trigger" element={<RequireAuth><Trigger/></RequireAuth>} />
           <Route path='/dataCollection/hostGroups' element={<RequireAuth><HostGroups/></RequireAuth>} />
           <Route path='/dataCollection/templates' element={<RequireAuth><Templates/></RequireAuth>} />
           <Route path='/dataCollection/templateGroups' element={<RequireAuth><TemplateGroups/></RequireAuth>} />

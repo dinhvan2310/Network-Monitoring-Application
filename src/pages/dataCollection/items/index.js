@@ -430,6 +430,9 @@ function Items() {
   useEffect(() => {
     setHostid(queryString.get("hostid"));
   }, [queryString])
+  useEffect(() => {
+    setTemplateid(queryString.get("templateid"));
+  }, [queryString])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -465,7 +468,7 @@ function Items() {
         setLoading(false);
     }
     fetchData();
-  }, [hostid, reload]);
+  }, [hostid, reload, templateid]);
 
   const [loading, setLoading] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
