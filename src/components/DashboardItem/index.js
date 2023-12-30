@@ -30,7 +30,7 @@ function DashboardItem({children, title, scroll = false}) {
   return ( 
     <>
       <Layout style={layoutStyle}>
-        {title && <Header style={{paddingInline: 12, backgroundColor: 'transparent'}}>{title}</Header>}
+        {title && <Header style={{paddingInline: 12, backgroundColor: '#fafafa', textAlign:'center', fontSize:'20px', marginBottom:'12px'}}>{title}</Header>}
         <Content style={contentStyle}>{children}</Content>
       </Layout>
     </>

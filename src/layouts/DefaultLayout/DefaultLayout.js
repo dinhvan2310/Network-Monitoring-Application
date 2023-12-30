@@ -11,7 +11,7 @@ import {
 } from "antd";
 import {DesktopOutlined, HomeOutlined, AppstoreOutlined, SettingOutlined, UserOutlined, MenuUnfoldOutlined, MonitorOutlined, DatabaseOutlined,
         MenuFoldOutlined, UserSwitchOutlined, LogoutOutlined, QuestionOutlined, UnorderedListOutlined, ProjectOutlined} from '@ant-design/icons';
-import logo from "assets/images/logo/logo.svg";
+import logo from "assets/images/logo/logo.jpg";
 import { Link, Outlet } from "react-router-dom";
 import userService from "services/userService";
 
@@ -22,7 +22,9 @@ const { Header, Sider, Content, Footer } = Layout;
 const DefaultLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
   const Title = Typography.Title;
-  const [userData, setUserData] = useState({})
+  const [userData, setUserData] = useState({result: {
+    roleid: "1"
+  }})
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -101,11 +103,6 @@ const DefaultLayout = () => {
           key: "/users",
           icon: <UserOutlined />,
         },
-        {
-          label: "User roles",
-          key: "/users/roles",
-          icon: <UserSwitchOutlined />,
-        }
       ]
     },
     {
@@ -129,6 +126,11 @@ const DefaultLayout = () => {
       }
     }
   ];
+  console.log(userData)
+  if(userData.result.roleid === "2"){
+    sidebarMenuItems.splice(3, 1)
+  }
+
 
   const {
     token: { colorBgContainer },
@@ -150,6 +152,8 @@ const DefaultLayout = () => {
             style={{
               width: "100%",
               objectFit: "cover",
+              objectPosition: "center",
+              borderBottom: "2px solid #f0f0f0",
             }}
             src={logo}
           />

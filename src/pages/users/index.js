@@ -196,8 +196,8 @@ function Users() {
               }
             >
               <Radio.Group>
-                <Radio.Button value="3">Admin</Radio.Button>
-                <Radio.Button value="1">User</Radio.Button>
+                <Radio.Button value="3">Super Admin</Radio.Button>
+                <Radio.Button value="2">Admin</Radio.Button>
               </Radio.Group>
             </Form.Item>
             <Form.Item
@@ -407,8 +407,8 @@ function Users() {
             ]}
           >
             <Radio.Group>
-              <Radio.Button value="3">Admin</Radio.Button>
-              <Radio.Button value="1">User</Radio.Button>
+            <Radio.Button value="3">Super Admin</Radio.Button>
+                <Radio.Button value="2">Admin</Radio.Button>
             </Radio.Group>
           </Form.Item>
           <Form.Item label="Name" name="name" rules={[{}]}>
