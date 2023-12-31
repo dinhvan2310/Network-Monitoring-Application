@@ -27,6 +27,7 @@ import { render } from "@testing-library/react";
 
 import styles from "./trigger.module.css";
 import { key } from "localforage";
+import templateService from "services/templateService";
 
 const PRIORITIES = {
     0: "Not classified",
@@ -53,24 +54,29 @@ const VALUES_COLOR = {
     1: "#e74c3c"
 }
 
-// const expressionConverter = async (trigger) => {
-//   console.log(trigger);
-//   const expression = trigger.expression;
+const expressionConverter = async (trigger, hostid, templateid) => {
+  let expression = trigger.expression;
+  let hostName = "";
 
-//   const regex = /\{(\d+)\}/g;
-//   const matches = [...expression.matchAll(regex)];
-//   console.log(matches);
+  if(hostid !== null) {
+    hostName = (await hostService.getHost(hostid)).result[0].host;
+  }
+  else{
+    hostName = (await templateService.getTemplateById(templateid)).result[0].host;
+    console.log(hostName)
+  }
 
-//   const rs = matches.map(async(match, idx) => {
-//     const func = trigger.functions[idx]
-//     console.log(idx)
-//     if(func === undefined) continue;
-//     console.log(func)
-//     // const itemName = (await itemService.getItem(func.itemid)).result[0].name;
-//     // console.log(itemName);
-//   });
-//   console.log(await Promise.all(rs));
-// }
+  const param = trigger.functions.map(async (func, index) => {
+    console.log(func)
+    const item = await itemService.getItem(func.itemid);
+    let parameter = func.parameter.split(",")[1];
+    parameter = parameter ? "," + parameter : "";
+    expression = expression.replace(`{${func.functionid}}`, `${func.function}(/${hostName}/${item.result[0].key_}${parameter})`)
+  })
+  await Promise.all(param)
+
+  return expression
+}
 
 
 
@@ -105,15 +111,23 @@ function Trigger() {
   useEffect(() => {
     const fetchData = async () => {
         setLoading(true);
-        const trigger = await triggerService.getTriggerByHost(hostid);
+        let trigger = null
+        if(hostid) {
+          trigger = await triggerService.getTriggerByHost(hostid);
+        } 
+        else {
+          trigger = await triggerService.getTriggerByTemplate(templateid);
+        }
         console.log(trigger);
-
-        setDataSource(trigger.result.map(item => {
-            return {
-                ...item,
-                key: item.triggerid
-            }
-        }));
+        const rs = trigger.result.map(async (item) => {
+          const expression = await expressionConverter(item, hostid, templateid);
+          return {
+              ...item,
+              key: item.triggerid,
+              expression: expression
+          }
+      })
+        setDataSource(await Promise.all(rs));
         setLoading(false);
     }
     fetchData();
@@ -614,6 +628,8 @@ function Trigger() {
             }
             const trigger = await triggerService.getTrigger(selectedRowKeys[0]);
             console.log(trigger);
+            const expression = await expressionConverter(trigger.result[0], hostid, templateid);
+            trigger.result[0].expression = expression
             setSelectedItem(trigger.result[0]);
             setIsModalUpdateShow(true);
           }}

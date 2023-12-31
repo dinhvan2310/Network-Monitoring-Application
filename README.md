@@ -51,6 +51,8 @@
 
 # Chương 1: Cơ sở lý thuyết
 
+
+
 # Chương 2: Phân tích thiết kế hệ thống giám sát
 -   Phân tích các thành phần của hệ thống giám sát
     -   Zabbix Server
@@ -59,15 +61,29 @@
     -   Web Interface thao tác với Zabbix Server
 -   Phân tích kiến trúc hệ thống giám sát
     -   Cơ chế hoạt động của hệ thống giám sát
--   Phân tích chức năng của Web Interface
-    -   Tạo các host
-    -   Tạo các item
-    -   Tạo các graph
-    -   Tạo các template
-    -   Tạo các user
-    -   Tạo các host group
-    -   Tạo các template group
-    -   ...
+-   Các phần tử cơ bản của hệ thống giám sát
+    -   Host
+    -   Item
+    -   Trigger
+    -   Template
+        -   là một tập hợp các item, trigger, graph, screen, application, host prototype, và discovery rule
+
+    -   Host group
+        -   là một tập hợp các host, host group có thể chứa các host group khác, tạo thành một cấu trúc cây, giúp cho việc quản lý các host dễ dàng hơn
+    -   Template group
+        -   được sử dụng để tổ chức và quản lý các mẫu (templates) của các thiết bị hoặc ứng dụng khác nhau. Template Group cho phép bạn nhóm các mẫu lại với nhau dựa trên một tiêu chí chung, chẳng hạn như nhóm các mẫu cho các máy chủ Windows, các mẫu cho các thiết bị mạng, các mẫu cho các ứng dụng cụ thể, v.v.
+-   Các chức năng cơ bản của hệ thống giám sát:
+    -   Tạo và quản lý các host
+    -   Tạo và quản lý các item
+    -   Tạo và quản lý các trigger
+    -   Tạo và quản lý các host group
+    -   Tạo và quản lý các template
+    -   Tạo và quản lý các template group
+    -   Tạo và quản lý các user
+    -   Cảnh báo khi có sự cố xảy ra
+    -   Hiển thị các biểu đồ thống kê
+    
+
 # Chương 3: Triển khai hệ thống giám sát
 -   Môi trường triển khai:
     -   PC1: 
@@ -103,13 +119,15 @@
     -   Cấu hình Web Interface để giám sát Router1
         -   Tạo host Router1
         -   Tạo các item để giám sát Router1
-    -   Cấu hình Web Interface để giám sát PC1
+    -   Cấu hình Web Interface thiết lập các thông số để giám sát PC1
         -   Tạo host PC1
         -   Tạo các item để giám sát PC1
--   Triển khai giám sát thông qua Web Interface
-    -   Giám sát PC1 thông qua Web Interface
-        
-    -   Giám sát Router1 thông qua Web Interface
+    -   Cấu hình Web Interface để giám sát Zabbix Server
+        -   Tạo host Zabbix Server
+        -   Tạo các item để giám sát Zabbix Server
+-   Triển khai kiểm thử hệ thống giám sát
+    -   Kiểm thử giám sát Router1
+    -   Kiểm thử giám sát PC1
 # Chương 4: Kết luận
 -   Tổng kết
 -   Hạn chế

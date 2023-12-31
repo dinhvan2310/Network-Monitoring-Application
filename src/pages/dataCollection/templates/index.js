@@ -197,7 +197,7 @@ function Templates() {
         return (
           <Space>
             <Tag color="#2ecc71">{trigger.result.length}</Tag>
-            <Link to={`/dataCollection/trigger?hostid=${key}`}>{"Trigger"}</Link>
+            <Link to={`/dataCollection/trigger?templateid=${key}`}>{"Trigger"}</Link>
           </Space>
         );
       },
