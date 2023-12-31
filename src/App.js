@@ -35,7 +35,7 @@ const App = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={<Login/>} />
+        
         <Route path="/" element={<RequireAuth><DefaultLayout/></RequireAuth>}>
           <Route path='/' element={<RequireAuth><Home/></RequireAuth>} />
           <Route path="/users" element={<RequireAuth isAdmin={true}><Users/></RequireAuth>} />
@@ -49,6 +49,7 @@ const App = () => {
           <Route path='/dataCollection/templates' element={<RequireAuth><Templates/></RequireAuth>} />
           <Route path='/dataCollection/templateGroups' element={<RequireAuth><TemplateGroups/></RequireAuth>} />
         </Route>
+        <Route path="/login" element={<Login/>} />
         <Route path="/settings" element={<Settings/>} />
         <Route path="/test" element={<Test/>} />
         
