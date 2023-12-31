@@ -29,7 +29,7 @@ const App = () => {
     console.log(res)
   }
 
-  func()
+  // func()
 
 
   return (

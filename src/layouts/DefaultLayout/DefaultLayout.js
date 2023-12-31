@@ -12,7 +12,7 @@ import {
 import {DesktopOutlined, HomeOutlined, AppstoreOutlined, SettingOutlined, UserOutlined, MenuUnfoldOutlined, MonitorOutlined, DatabaseOutlined,
         MenuFoldOutlined, UserSwitchOutlined, LogoutOutlined, QuestionOutlined, UnorderedListOutlined, ProjectOutlined} from '@ant-design/icons';
 import logo from "assets/images/logo/logo.jpg";
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 import userService from "services/userService";
 
 // ----------------------------------------------------------------------------------
@@ -25,6 +25,8 @@ const DefaultLayout = () => {
   const [userData, setUserData] = useState({result: {
     roleid: "1"
   }})
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -127,6 +129,8 @@ const DefaultLayout = () => {
     }
   ];
   console.log(userData)
+  if(userData.error)
+    return navigate('/login')
   if(userData.result.roleid === "2"){
     sidebarMenuItems.splice(3, 1)
   }
