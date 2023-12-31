@@ -5,18 +5,23 @@ import userService from "services/userService";
 function RequireAuth({children, isAdmin = false}) {
     const token = localStorage.getItem("token");
     const navigate = useNavigate();
-    if(!token) {
-        navigate("/login");
-    }
+    
     useEffect(() => {
+        if(!token) {
+            children = null;
+            return navigate("/login");
+        }
         const checkRole = async () => {
             const roleid = (await userService.checkAuthentication(token)).result.roleid;
-            if(roleid != 3) navigate("/error") // 3 is admin roleid
+            if(roleid != 3)  return navigate("/error") // 3 is admin roleid
         }
         if(isAdmin) {
             checkRole();
         }
     }, [])
+
+    console.log(token);
+    
     
     return children;
 }

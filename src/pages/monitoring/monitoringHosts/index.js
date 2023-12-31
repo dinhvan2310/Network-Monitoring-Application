@@ -136,17 +136,6 @@ function MonitoringHost() {
       key: "interfaces",
     },
     {
-      title: "Status",
-      key: "status",
-      render: ({ status }) => {
-        return status === "1" ? (
-          <Tag color="#e74c3c">Disabled</Tag>
-        ) : (
-          <Tag color="#2ecc71">Enabled</Tag>
-        );
-      },
-    },
-    {
       title: "Availability",
       key: "availability",
       render: ({ hostInterfaces }) => {
@@ -214,8 +203,8 @@ function MonitoringHost() {
   useEffect(() => {
     const fetchDevices = async () => {
       setLoading(true);
-      const hosts = await hostService.getHosts();
-      const hostInterfaces = hosts.result.map(async (host) => {
+      const hosts = (await hostService.getHosts()).result.filter(host => host.status === "0");
+      const hostInterfaces = hosts.map(async (host) => {
         console.log(host);
         const hostInterfaces = await hostService.getHostInterfaces(host.hostid);
         const items = await itemService.getItemsByHost(host.hostid);
@@ -232,7 +221,6 @@ function MonitoringHost() {
               " : " +
               hostInterfaces.result[0].port
             : "",
-          status: host.status,
           hostInterfaces: hostInterfaces,
           latestData: { latestData: items.result, hostid: host.hostid },
           type: hostInterfaces.result ? hostInterfaces.result[0].type : "",

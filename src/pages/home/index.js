@@ -3,6 +3,7 @@ import { Row, Col, Calendar, theme, List, Avatar, Table } from "antd";
 import DashboardItem from "components/DashboardItem";
 import ReactClock from "@uiw/react-clock";
 import ItemLineChart from "components/ItemLineChart";
+import {useNavigate} from "react-router-dom";
 import itemService from "services/itemService";
 import hostService from "services/hostService";
 import triggerService from "services/triggerService";
@@ -15,6 +16,7 @@ const onPanelChange = (value, mode) => {
 
 function Home() {
   const { token } = theme.useToken();
+  const navigate = useNavigate();
   const wrapperStyle = {
     // width: 300,
     border: `1px solid ${token.colorBorderSecondary}`,
@@ -29,7 +31,10 @@ function Home() {
       setInfoSystemLoading(true);
 
       const host = await hostService.getHosts();
-
+      console.log(host);
+      if(host.error){
+        return navigate("/login")
+      }
 
       const zabbix = host.result.filter(
         (item) => item.host === "Zabbix server"

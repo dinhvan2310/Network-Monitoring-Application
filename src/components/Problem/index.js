@@ -99,7 +99,9 @@ function Problem({item}) {
                             <>
                                 <Space
                                     direction="horizontal"
-                                    style={{ width: "100%" }}
+                                    style={{  backgroundColor: PRIORITIES_COLOR[item.severity],
+                                            padding: "12px", borderRadius: "12px"
+                                }}
                                 >
                                     <p>{item.name}</p>
                                     <Tag color={PRIORITIES_COLOR[item.severity]}>{PRIORITIES[item.severity]}</Tag>
