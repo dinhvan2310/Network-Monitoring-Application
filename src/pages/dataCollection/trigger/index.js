@@ -9,7 +9,9 @@ import {
   Tooltip,
   Select,
   Popconfirm,
-  ConfigProvider
+  List,
+  Collapse,
+  Drawer 
 } from "antd";
 import {
   PlusOutlined,
@@ -100,6 +102,12 @@ function Trigger() {
   const [reload, setReload] = useState(false);
   const [isModalAddShow, setIsModalAddShow] = useState(false);
   const [isModalUpdateShow, setIsModalUpdateShow] = useState(false);
+  const [isModalItemShow, setIsModalItemShow] = useState(false);
+  const [items, setItems] = useState([]);
+
+  const [hostName, setHostName] = useState("");
+  const [templateName, setTemplateName] = useState("");
+
   const [selectedItem, setSelectedItem] = useState(() => {
     return {
       expression: '',
@@ -114,9 +122,16 @@ function Trigger() {
         let trigger = null
         if(hostid) {
           trigger = await triggerService.getTriggerByHost(hostid);
+          const items = await itemService.getItemsByHost(hostid);
+          setHostName((await hostService.getHost(hostid)).result[0].host)
+          setItems(items.result) 
+          console.log(items)
         } 
         else {
           trigger = await triggerService.getTriggerByTemplate(templateid);
+          const items = await itemService.getItemByTemplate(templateid);
+          setTemplateName((await templateService.getTemplateById(templateid)).result[0].host)
+          setItems(items.result) 
         }
         console.log(trigger);
         const rs = trigger.result.map(async (item) => {
@@ -374,18 +389,19 @@ function Trigger() {
         loading={loading}
       />
       
-      <Modal
+      <Drawer
         destroyOnClose={true}
         title="Add Item"
         open={isModalAddShow}
-        onCancel={() => setIsModalAddShow(false)}
+        width={536}
+        onClose={() => setIsModalAddShow(false)}
         footer={null}
       >
         <Form
           name="addItem"
-          labelCol={{ span: 8 }}
+          labelAlign="left"
+          labelCol={{ span: 6 }}
           wrapperCol={{ span: 16 }}
-          style={{ maxWidth: 800 }}
           initialValues={{}}
           onFinish={async (values) => {
             console.log(values);
@@ -422,8 +438,35 @@ function Trigger() {
               },
             ]}
           >
-            <Input />
+            <Input.TextArea/>
           </Form.Item>
+          <Drawer 
+        destroyOnClose={true}
+        title={`${items.length} Items of ${hostName?hostName:templateName}`}
+        open={isModalItemShow}
+        size="default"
+        onClose={() => setIsModalItemShow(false)}
+        footer={null}
+        >
+          <List
+            size="large"
+            bordered
+            dataSource={items}
+            renderItem={item => 
+              <List.Item 
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                }}
+              >
+                <h4>{item.name}</h4>
+                <p>{`/${hostName?hostName:templateName}/${item.key_}`}</p>
+              </List.Item>
+            }
+          />
+
+          </Drawer>
           <Form.Item
             label="Severity"
             name={"priority"}
@@ -443,24 +486,34 @@ function Trigger() {
                 <Select.Option value="5">Disaster</Select.Option>
             </Select>
           </Form.Item>
-          <Button type="primary" htmlType="submit">
-            Submit
-          </Button>
+          <Space>
+            <Button type="primary" htmlType="submit">
+              Submit
+            </Button>
+            <Button 
+                color="#1890ff"
+                onClick={() => setIsModalItemShow(true)}
+              >
+                Show Items
+              </Button>
+          </Space>
         </Form>
-      </Modal>
+      </Drawer>
 
-      <Modal
+      <Drawer 
         destroyOnClose={true}
         title="Update Trigger"
         open={isModalUpdateShow}
-        onCancel={() => setIsModalUpdateShow(false)}
+        width={536}
+        onClose={() => setIsModalUpdateShow(false)}
         footer={null}
       >
         <Form
           name="addItem"
-          labelCol={{ span: 8 }}
+          labelAlign="left"
+          labelCol={{ span: 6 }}
           wrapperCol={{ span: 16 }}
-          style={{ maxWidth: 800 }}
+          style={{ width: "100%" }}
           initialValues={{}}
           onFinish={async (values) => {
             console.log(values);
@@ -499,8 +552,36 @@ function Trigger() {
             ]}
             initialValue={selectedItem.expression}
           >
-            <Input />
+            <Input.TextArea/>
           </Form.Item>
+          
+          <Drawer 
+        destroyOnClose={true}
+        title={`${items.length} Items of ${hostName?hostName:templateName}`}
+        open={isModalItemShow}
+        size="default"
+        onClose={() => setIsModalItemShow(false)}
+        footer={null}
+        >
+          <List
+            size="large"
+            bordered
+            dataSource={items}
+            renderItem={item => 
+              <List.Item 
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                }}
+              >
+                <h4>{item.name}</h4>
+                <p>{`/${hostName?hostName:templateName}/${item.key_}`}</p>
+              </List.Item>
+            }
+          />
+
+          </Drawer>
           <Form.Item
             label="Severity"
             name={"priority"}
@@ -521,12 +602,21 @@ function Trigger() {
                 <Select.Option value="5">Disaster</Select.Option>
             </Select>
           </Form.Item>
-          <Button type="primary" htmlType="submit">
-            Submit
-          </Button>
+          <Space>
+            <Button type="primary" htmlType="submit">
+              Submit
+            </Button>
+            <Button 
+                color="#1890ff"
+                onClick={() => setIsModalItemShow(true)}
+              >
+                Show Items
+              </Button>
+          </Space>
         </Form>
-      </Modal>
+      </Drawer >
 
+      
       <Space>
         <Button
           danger
@@ -603,7 +693,6 @@ function Trigger() {
         >
           <Button
           type="primary"
-          ghost
           danger
           disabled={selectedRowKeys.length > 0 ? false : true}
           
@@ -614,8 +703,6 @@ function Trigger() {
         </Popconfirm>
         
           <Button
-          type="primary"
-          ghost
           disabled={selectedRowKeys.length > 0 ? false : true}
           onClick={async () => {
             if (selectedRowKeys.length > 1) {

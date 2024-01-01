@@ -9,6 +9,7 @@ import {
   Tag,
   Tooltip,
   TreeSelect,
+  Drawer
 } from "antd";
 import {
   PlusOutlined,
@@ -24,6 +25,24 @@ import itemService from "services/itemService";
 import { Link } from "react-router-dom";
 import { key } from "localforage";
 import triggerService from "services/triggerService";
+
+const AUTH_PROTOCOL = {
+  0: "MD5",
+  1: "SHA1",
+  2: "SHA224",
+  3: "SHA256",
+  4: "SHA384",
+  5: "SHA512",
+}
+
+const PRIV_PROTOCOL = {
+  0: "DES",
+  1: "AES128",
+  2: "AES192",
+  3: "AES256",
+  4: "AES192C",
+  5: "AES256C",
+}
 
 function Hosts() {
   //
@@ -317,6 +336,7 @@ function Hosts() {
 
       const hostInterfaces = hosts.result.map(async (host) => {
         const hostInterfaces = await hostService.getHostInterfaces(host.hostid);
+        console.log(hostInterfaces)
         console.log(await itemService.getItemsByHost(host.hostid));
         const item = await itemService.getItemsByHost(host.hostid);
         const trigger = await triggerService.getTriggerByHost(host.hostid);
@@ -365,10 +385,11 @@ function Hosts() {
   const [treeData, setTreeData] = useState([]);
   return (
     <>
-      <Modal
+      <Drawer
         title="Add host"
+        width={536}
         open={isModalAddHostShown}
-        onCancel={() => {
+        onClose={() => {
           setVersion(2);
           setSMNPv3Version(0);
           setIsModalAddHostShown(false)
@@ -748,10 +769,16 @@ function Hosts() {
             Submit
           </Button>
         </Form>
-      </Modal>
-      <Modal
+      </Drawer>
+      <Drawer
         open={isModalShown}
-        onCancel={() => setIsModalShown(false)}
+        onClose={() => {
+          setIsModalShown(false)
+          setVersion(2);
+          setSMNPv3Version(0);
+        }}
+        width={536}
+        title="Edit host"
         footer={null}
         destroyOnClose={true}
       >
@@ -780,21 +807,48 @@ function Hosts() {
                 };
               });
             }
-            console.log(host);
+
+            console.log(values)
+            if(!Number(values.authprotocol)){
+              if(selectedHost.interfaces.result[0].details.version === "2"){
+                values.authprotocol = 0
+              }
+              if(selectedHost.interfaces.result[0].details.version === "3"){
+                values.authprotocol = selectedHost.interfaces.result[0].details.authprotocol 
+              }
+              
+            }
+            if(!Number(values.privprotocol)){
+              if(selectedHost.interfaces.result[0].details.version === "2"){
+                values.privprotocol = 0
+              }
+              if(selectedHost.interfaces.result[0].details.version === "3"){
+                values.privprotocol = selectedHost.interfaces.result[0].details.privprotocol 
+              }
+            }
 
             const response = await hostService.updateHost(host);
+            const response2 = await hostService.updateHostInterface(host.hostid, selectedHost.interfaces.result[0].interfaceid, {
+              version: `${values.version}`,
+              port: `${values.port}`,
+              ip: `${values.ip}`,
+              bulk: 1,
+              community: `${values.community?values.community:""}`,
+              contextname: `${values.contextname?values.contextname:""}`,
+              securitylevel: `${values.securitylevel}`,
+              securityname: `${values.securityname?values.securityname:""}`,
+              authprotocol: `${values.authprotocol}`,
+              authpassphrase: `${values.authpassphrase?values.authpassphrase:""}`,
+              privprotocol: `${values.privprotocol}`,
+              privpassphrase: `${values.privpassphrase?values.privpassphrase:""}`,
+            })
             if (response.error) {
-              JSAlert.alert(response.error.data, response.error.message);
+              JSAlert.alert("1 :" + response.error.data, response.error.message);
+            } if (response2.error) {
+              JSAlert.alert("2: " + response2.error.data, response2.error.message);
             } else {
               JSAlert.alert("Update host successfully");
-              setDataSource(
-                dataSource.map((host) => {
-                  if (host.key === selectedHost.result[0].hostid) {
-                    host.name = values.host;
-                  }
-                  return host;
-                })
-              );
+              setReLoad((pre) => !pre);
               setIsModalShown(false);
             }
           }}
@@ -870,7 +924,7 @@ function Hosts() {
               })}
             />
           </Form.Item>
-          {/* <Form.Item
+          <Form.Item
             label="Ip address"
             name={"ip"}
             rules={[
@@ -883,13 +937,14 @@ function Hosts() {
                 message: "Please input valid ip address",
               },
             ]}
+            initialValue={selectedHost ? selectedHost.interfaces.result[0].ip : ""}
           >
             <Input />
           </Form.Item>
           <Form.Item
             label="Port"
             name={"port"}
-            initialValue={"161"}
+            initialValue={selectedHost ? selectedHost.interfaces.result[0].port : ""}
             rules={[
               {
                 required: true,
@@ -908,9 +963,9 @@ function Hosts() {
                 message: "Please input snmp version",
               },
             ]}
+            initialValue={version}
           >
             <Select
-              // defaultValue={2}
               style={{
                 width: 120,
               }}
@@ -933,7 +988,7 @@ function Hosts() {
             <Form.Item
               label="Community"
               name={"community"}
-              initialValue={"public"}
+              initialValue={selectedHost ? selectedHost.interfaces.result[0].details.community : ""}
               rules={[
                 {
                   required: true,
@@ -944,14 +999,168 @@ function Hosts() {
               <Input />
             </Form.Item>
           ) : version === 3 ? (
-            <h1>Version3</h1>
-          ) : null} */}
+            <>
+              <Form.Item
+                label="Security level"
+                name={"securitylevel"}
+                initialValue={SMNPv3Version}
+              >
+                <Select
+                  style={{
+                    width: 120,
+                  }}
+                  onChange={(value) => {
+                    setSMNPv3Version(value);
+                  }}
+                  options={[
+                    {
+                      value: 0,
+                      label: "noAuthNoPriv",
+                    },
+                    {
+                      value: 1,
+                      label: "authNoPriv",
+                    },
+                    {
+                      value: 2,
+                      label: "authPriv",
+                    },
+                  ]}
+                />
+              </Form.Item>
+              <>
+                  <Form.Item
+                    label="Context name"
+                    name={"contextname"}
+                    initialValue={selectedHost? selectedHost.interfaces.result[0].details.contextname : ""}
+                  >
+                    <Input />
+                  </Form.Item>
+                  <Form.Item
+                    label="Security name"
+                    name={"securityname"}
+                    initialValue={selectedHost?selectedHost.interfaces.result[0].details.securityname:""}
+                  >
+                    <Input />
+                  </Form.Item>
+                </>
+              {SMNPv3Version !== 0 ? (
+                <>
+                  <Form.Item
+                label="Auth protocol"
+                name={"authprotocol"}
+                initialValue={AUTH_PROTOCOL[selectedHost.interfaces.result[0].details.authprotocol]}
+              >
+                <Select
+                  style={{
+                    width: 120,
+                  }}
+                  onChange={(value) => {
+                    setAuth(value);
+                  }}
+                  options={[
+                    {
+                      value: 0,
+                      label: "MD5",
+                    },
+                    {
+                      value: 1,
+                      label: "SHA1",
+                    },
+                    {
+                      value: 2,
+                      label: "SHA224",
+                    },
+                    {
+                      value: 3,
+                      label: "SHA256",
+                    },
+                    {
+                      value: 4,
+                      label: "SHA384",
+                    },
+                    {
+                      value: 5,
+                      label: "SHA512",
+                    }
+                  ]}
+                />
+              </Form.Item>
+              <Form.Item
+                label="Auth pass"
+                name={"authpassphrase"}
+                initialValue={selectedHost.interfaces.result[0].details.authpassphrase}
+              >
+                <Input />
+              </Form.Item>
+                </>
+              ) : null}
+              {SMNPv3Version === 2 ? (
+                <>
+                  <Form.Item
+                label="Priv protocol"
+                name={"privprotocol"}
+                initialValue={PRIV_PROTOCOL[selectedHost.interfaces.result[0].details.privprotocol]}
+              >
+                <Select
+                  style={{
+                    width: 120,
+                  }}
+                  onChange={(value) => {
+                    setAuth(value);
+                  }}
+                  options={[
+                    {
+                      value: 0,
+                      label: "DES",
+                    },
+                    {
+                      value: 1,
+                      label: "AES128",
+                    },
+                    {
+                      value: 2,
+                      label: "AES192",
+                    },
+                    {
+                      value: 3,
+                      label: "AES256",
+                    },
+                    {
+                      value: 4,
+                      label: "AES192C",
+                    },
+                    {
+                      value: 5,
+                      label: "AES256C",
+                    }
+                  ]}
+                />
+              </Form.Item>
+              <Form.Item
+                label="Priv pass"
+                name={"privpassphrase"}
+                initialValue={selectedHost.interfaces.result[0].details.privpassphrase}
+              >
+                <Input />
+              </Form.Item>
+                </>
+              ) : null}
+            </>
+          ) : null}
+
+
+
+
+
+
+
 
           <Button type="primary" htmlType="submit">
             Submit
           </Button>
         </Form>
-      </Modal>
+      </Drawer>
       <Table
         title={() => "Hosts"}
         rowSelection={rowSelection}
@@ -1011,7 +1220,6 @@ function Hosts() {
         </Button>
         <Button
           type="primary"
-          ghost
           danger
           disabled={selectedRowKeys.length > 0 ? false : true}
           onClick={() => {
@@ -1031,8 +1239,6 @@ function Hosts() {
           Delete
         </Button>
         <Button
-          type="primary"
-          ghost
           disabled={selectedRowKeys.length > 0 ? false : true}
           onClick={async () => {
             if (selectedRowKeys.length > 1) {
@@ -1048,6 +1254,7 @@ function Hosts() {
             hostSelected.templates = await templateService.getTemplatesByHost(
               selectedRowKeys[0]
             );
+            hostSelected.interfaces = await hostService.getHostInterfaces(selectedRowKeys[0])
             console.log(hostSelected);
             setSelectedHost(hostSelected);
             setValue(
@@ -1057,6 +1264,8 @@ function Hosts() {
             );
 
             await loadTreeDataHostGroup();
+            setVersion(Number(hostSelected.interfaces.result[0].details.version));
+            setSMNPv3Version(Number(hostSelected.interfaces.result[0].details.securitylevel)?Number(hostSelected.interfaces.result[0].details.securitylevel):0);
             await loadTreeData();
             setIsModalShown(true);
           }}

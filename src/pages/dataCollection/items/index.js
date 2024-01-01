@@ -877,6 +877,7 @@ function Items() {
         </Form>
       </Modal>
       <Table
+        bordered
         title={() => "Items"}
         rowSelection={rowSelection}
         columns={columns}

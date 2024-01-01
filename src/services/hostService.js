@@ -99,6 +99,54 @@ const hostService = {
         console.log(updateHost)
         return httpRequests.post('', updateHost)
     },
+    updateHostInterface: async (hostid, interfaceid, interfaceDetails) => {
+        console.log(interfaceDetails)
+        if(interfaceDetails.version === "2"){
+            return httpRequests.post('', {
+                "jsonrpc": "2.0",
+                "method": "hostinterface.update",
+                "params": {
+                    "interfaceid": `${interfaceid}`,
+                    "hostid": `${hostid}`,
+                    "ip": `${interfaceDetails.ip}`,
+                    "port": `${interfaceDetails.port}`,
+                    "details": {
+                        "version": `${interfaceDetails.version}`,
+                        "bulk": `${interfaceDetails.bulk}`,
+                        "community": `${interfaceDetails.community}`
+                    }
+                },
+                auth: `${localStorage.getItem("token")}`,
+                "id": 1
+            })
+        }
+        if(interfaceDetails.version === "3"){
+            return httpRequests.post('', {
+                "jsonrpc": "2.0",
+                "method": "hostinterface.update",
+                "params": {
+                    "interfaceid": `${interfaceid}`,
+                    "hostid": `${hostid}`,
+                    "ip": `${interfaceDetails.ip}`,
+                    "port": `${interfaceDetails.port}`,
+                    "details": {
+                        "version": `${interfaceDetails.version}`,
+                        "bulk": `${interfaceDetails.bulk}`,
+                        "contextname": `${interfaceDetails.contextname}`,
+                        "securityname": `${interfaceDetails.securityname}`,
+                        "securitylevel": `${interfaceDetails.securitylevel}`,
+                        "authprotocol": `${interfaceDetails.authprotocol}`,
+                        "authpassphrase": `${interfaceDetails.authpassphrase}`,
+                        "privprotocol": `${interfaceDetails.privprotocol}`,
+                        "privpassphrase": `${interfaceDetails.privpassphrase}`
+                    }
+                },
+                auth: `${localStorage.getItem("token")}`,
+                "id": 1
+            })
+        }
+        
+    },
     getHostName: async (hostid) => {
         return httpRequests.post('', {
             "jsonrpc": "2.0",

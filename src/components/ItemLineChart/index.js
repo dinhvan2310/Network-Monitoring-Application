@@ -86,12 +86,24 @@ const ItemLineChart = ({ item, isLabel = true }) => {
         Math.floor(time[0]["$d"].getTime() / 1000),
         Math.floor(time[1]["$d"].getTime() / 1000)
       );
+      console.log(item)
       console.log(history);
+
       let labels = [];
       let dataSet = [];
-      history.result.forEach((item) => {
-        labels.push(convertTime(item.clock));
-        dataSet.push(Number(item.value));
+      history.result.forEach((i) => {
+        labels.push(convertTime(i.clock));
+        
+        switch (item.units) {
+          case "GB":
+            dataSet.push(Number(i.value) / 1024 / 1024 / 1024); // Convert from bytes to gigabytes
+            break;
+          case 'Mbps':
+            dataSet.push(Number(i.value) / 1024 / 1024); // Convert from bytes to megabytes
+            break;
+          default:
+              dataSet.push(Number(i.value));
+        }
       });
       setData({
         labels: isLabel ? labels : labels.map(() => ""),

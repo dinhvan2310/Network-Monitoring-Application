@@ -16,9 +16,9 @@
 -   Physical Memory: Used memory
     -   Dung lượng RAM đã sử dụng
     -   vd: ung lượng RAM đã sử dụng 3GB
--   Windows: CPU utilization
+<!-- -   Windows: CPU utilization
     -   % CPU đã sử dụng 
-    -   vd: CPU đã sử dụng 40%
+    -   vd: CPU đã sử dụng 40% -->
 -   Windows: SNMP agent availability
     -   Availability of SNMP checks on the host. The value of this item corresponds to      availability icons in the host list.
         Possible value:
@@ -43,7 +43,42 @@
     -   Nó thường được sử dụng để đo lường thời gian kết nối mạng liên tục, mà không bị ảnh hưởng bởi việc khởi động lại máy tính hoặc thiết bị phần cứng.
 
 #   Giám sát router
--   Chưa coi 
+-   #1: CPU utilization
+    -   % CPU đã sử dụng
+-   Cisco IOS: Hardware serial number
+    -   Số serial của router (4279256517)
+-   Cisco IOS: Hardware model name
+    -   Tên model của router (CISCO7206VXR)
+-   Cisco IOS: Operating system
+    -   Hệ điều hành của router (15.2(4)M7)
+-   Cisco IOS: SNMP agent availability
+    -   Giá trị của item này tương ứng với các biểu tượng available trong danh sách host.
+        Giá trị có thể có:
+        0 - không khả dụng
+        1 - khả dụng
+        2 - không xác định
+-   Cisco IOS: SNMP traps (fallback)
+    -   Các traps SNMP (fallback) được gửi từ router
+-   Cisco IOS: System description
+    -   Mô tả về router
+-   Cisco IOS: System location
+    -   Vị trí vật lý của router
+-   Cisco IOS: System name
+    -   Tên của router
+-   Cisco IOS: System uptime (hardware).
+-   Cisco IOS: System uptime (network)
+-   I/O: Free memory
+    -   Dung lượng bộ nhớ trống
+-   I/O: Memory utilization
+    -   % dung lượng bộ nhớ đã sử dụng
+-   I/O: Used memory
+    -   Dung lượng bộ nhớ đã sử dụng
+-   I/O Cont Inlet: Temperature
+    -   Nhiệt độ của I/O Cont Inlet (22)
+-   I/O Cont Outlet: Temperature status
+    -   Trạng thái nhiệt độ của I/O Cont Outlet (1)
+
+
 
 
 
@@ -85,24 +120,24 @@
     
 
 # Chương 3: Triển khai hệ thống giám sát
+-   Phát biểu bài toán
+    -   Mô tả bài toán
+        -   
+    -   Mô tả môi trường triển khai
+    -   Mô tả các chức năng cần triển khai
 -   Môi trường triển khai:
-    -   PC1: 
-        -   Thông tin về PC1:
-            -   CPU: Intel Core i5-8250U
-            -   RAM: 8GB
-            -   Ổ cứng: 256GB SSD
-            -   Hệ điều hành: Windows 10
-            -   Địa chỉ IP: 
+    -   zabbixsrv:
+        -   note: máy chủ giám sát thiết bị mạng, cài đặt zabbix server, 
+        -   OS: Ubuntu 20.04
+        -   IP:
+    -   Pc1:
+        -   note: máy tính cá nhân, cài đặt zabbix agent, web interface
+        -   OS: Windows 11
+        -   IP:
     -   Router1:
-        -   Thông tin về Router1:
-            -   CPU: Intel Core i5-8250U
-    -   Ubuntu Server:
-        -   Thông tin về Ubuntu Server:
-            -   CPU: Intel Core i5-8250U
-            -   RAM: 8GB
-            -   Ổ cứng: 256GB SSD
-            -   Hệ điều hành: Ubuntu 22.04
-    -   Zabbix Server: 
+        -   note: thiết bị mạng, cài đặt zabbix agent
+        -   OS: Cisco IOS
+        -   IP:
 -   Triển khai cấu hình hệ thống giám sát:
     -   Cấu hình Zabbix Server trên Server Ubuntu
     -   Cấu hình SNMP Agent trên PC1

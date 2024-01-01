@@ -308,7 +308,7 @@ function LatestData() {
           value: "21",
         },
       ],
-      defaultFilteredValue: [20, 5, 18],
+      // defaultFilteredValue: [20, 5, 18],
       onFilter: (value, record) => {
         return record.type === value;
       },
@@ -369,6 +369,7 @@ function LatestData() {
       title: "Change",
       dataIndex: "change",
       key: "change",
+      align: "center",
       textWrap: "word-break",
       ellipsis: true,
     },
@@ -474,9 +475,22 @@ function LatestData() {
           console.log(item.lastvalue)
         } 
         if(item.units === 'B') {
-          item.lastvalue = (item.lastvalue/1024/1024/1024);
-          item.prevvalue = (item.prevvalue/1024/1024/1024);
-          item.units = 'GB';
+          if (item.lastvalue > 1024*1024*1024) {
+            item.lastvalue = (item.lastvalue/1024/1024/1024);
+            item.prevvalue = (item.prevvalue/1024/1024/1024);
+            item.units = 'GB';
+          } else if (item.lastvalue > 1024*1024) {
+            item.lastvalue = (item.lastvalue/1024/1024);
+            item.prevvalue = (item.prevvalue/1024/1024);
+            item.units = 'MB';
+          } else if (item.lastvalue > 1024) {
+            item.lastvalue = (item.lastvalue/1024);
+            item.prevvalue = (item.prevvalue/1024);
+            item.units = 'KB';
+          } else {
+            item.units = 'B';
+          }
+          
         }
         if(item.units === 'bps') {
           item.lastvalue = (item.lastvalue/1024/1024);
@@ -536,16 +550,21 @@ function LatestData() {
   return (
     <>
       <Table
-        title={() => "Last data"}
+        bordered
+        size="middle"
         rowSelection={rowSelection}
         columns={columns}
         dataSource={dataSource}
         loading={loading}
+        columnWidth={32}
         expandable={{
           expandedRowRender: (item) => {
             console.log(item);
             if (item.value_type === "0" || item.value_type === "3") {
-              return <ItemLineChart item={item} />;
+              return <div style={{
+                width: '100%',
+                padding: '0 142px'
+              }}> <ItemLineChart item={item} /> </div>;
             } else {
               return <ItemListChart item={item} />;
             }
