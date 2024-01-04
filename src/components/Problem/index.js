@@ -3,6 +3,7 @@ import problemService from "services/problemService";
 import { Timeline, Space, Tag } from 'antd';
 import { ClockCircleOutlined } from '@ant-design/icons';
 import hostService from "services/hostService";
+import { useNavigate } from "react-router-dom";
 
 const convertTime = (timestamp) => {
     const date = new Date(timestamp * 1000);
@@ -29,13 +30,15 @@ const PRIORITIES_COLOR = {
 }
 
 function Problem({item}) {
-    
+    const navigate = useNavigate()
     const [data, setData] = useState()
     useEffect(() => {
         const fetchData = async () => {
             let problem
             if(!item) {
-                const hostsid = (await hostService.getHosts()).result.map((item) => [item.hostid, item.name])
+                const hosts = await hostService.getHosts()
+                if(hosts.error) return navigate("/login")
+                const hostsid = (hosts).result.map((item) => [item.hostid, item.name])
                 console.log(hostsid)
                 const problems = hostsid.map(async (problem) => {
                     const problem_ = await problemService.getProblemByHost(problem[0])
@@ -128,6 +131,9 @@ function Problem({item}) {
     return ( 
         <>
             <Timeline
+                style={{
+                    marginTop: "12px",
+                }}
                 mode="left"
                 items={data}
             />

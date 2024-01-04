@@ -16,9 +16,9 @@
 -   Physical Memory: Used memory
     -   Dung lượng RAM đã sử dụng
     -   vd: ung lượng RAM đã sử dụng 3GB
--   Windows: CPU utilization
+<!-- -   Windows: CPU utilization
     -   % CPU đã sử dụng 
-    -   vd: CPU đã sử dụng 40%
+    -   vd: CPU đã sử dụng 40% -->
 -   Windows: SNMP agent availability
     -   Availability of SNMP checks on the host. The value of this item corresponds to      availability icons in the host list.
         Possible value:
@@ -43,13 +43,50 @@
     -   Nó thường được sử dụng để đo lường thời gian kết nối mạng liên tục, mà không bị ảnh hưởng bởi việc khởi động lại máy tính hoặc thiết bị phần cứng.
 
 #   Giám sát router
--   Chưa coi 
+-   #1: CPU utilization
+    -   % CPU đã sử dụng
+-   Cisco IOS: Hardware serial number
+    -   Số serial của router (4279256517)
+-   Cisco IOS: Hardware model name
+    -   Tên model của router (CISCO7206VXR)
+-   Cisco IOS: Operating system
+    -   Hệ điều hành của router (15.2(4)M7)
+-   Cisco IOS: SNMP agent availability
+    -   Giá trị của item này tương ứng với các biểu tượng available trong danh sách host.
+        Giá trị có thể có:
+        0 - không khả dụng
+        1 - khả dụng
+        2 - không xác định
+-   Cisco IOS: SNMP traps (fallback)
+    -   Các traps SNMP (fallback) được gửi từ router
+-   Cisco IOS: System description
+    -   Mô tả về router
+-   Cisco IOS: System location
+    -   Vị trí vật lý của router
+-   Cisco IOS: System name
+    -   Tên của router
+-   Cisco IOS: System uptime (hardware).
+-   Cisco IOS: System uptime (network)
+-   I/O: Free memory
+    -   Dung lượng bộ nhớ trống
+-   I/O: Memory utilization
+    -   % dung lượng bộ nhớ đã sử dụng
+-   I/O: Used memory
+    -   Dung lượng bộ nhớ đã sử dụng
+-   I/O Cont Inlet: Temperature
+    -   Nhiệt độ của I/O Cont Inlet (22)
+-   I/O Cont Outlet: Temperature status
+    -   Trạng thái nhiệt độ của I/O Cont Outlet (1)
+
+
 
 
 
 
 
 # Chương 1: Cơ sở lý thuyết
+
+
 
 # Chương 2: Phân tích thiết kế hệ thống giám sát
 -   Phân tích các thành phần của hệ thống giám sát
@@ -59,34 +96,48 @@
     -   Web Interface thao tác với Zabbix Server
 -   Phân tích kiến trúc hệ thống giám sát
     -   Cơ chế hoạt động của hệ thống giám sát
--   Phân tích chức năng của Web Interface
-    -   Tạo các host
-    -   Tạo các item
-    -   Tạo các graph
-    -   Tạo các template
-    -   Tạo các user
-    -   Tạo các host group
-    -   Tạo các template group
-    -   ...
+-   Các phần tử cơ bản của hệ thống giám sát
+    -   Host
+    -   Item
+    -   Trigger
+    -   Template
+        -   là một tập hợp các item, trigger, graph, screen, application, host prototype, và discovery rule
+
+    -   Host group
+        -   là một tập hợp các host, host group có thể chứa các host group khác, tạo thành một cấu trúc cây, giúp cho việc quản lý các host dễ dàng hơn
+    -   Template group
+        -   được sử dụng để tổ chức và quản lý các mẫu (templates) của các thiết bị hoặc ứng dụng khác nhau. Template Group cho phép bạn nhóm các mẫu lại với nhau dựa trên một tiêu chí chung, chẳng hạn như nhóm các mẫu cho các máy chủ Windows, các mẫu cho các thiết bị mạng, các mẫu cho các ứng dụng cụ thể, v.v.
+-   Các chức năng cơ bản của hệ thống giám sát:
+    -   Tạo và quản lý các host
+    -   Tạo và quản lý các item
+    -   Tạo và quản lý các trigger
+    -   Tạo và quản lý các host group
+    -   Tạo và quản lý các template
+    -   Tạo và quản lý các template group
+    -   Tạo và quản lý các user
+    -   Cảnh báo khi có sự cố xảy ra
+    -   Hiển thị các biểu đồ thống kê
+    
+
 # Chương 3: Triển khai hệ thống giám sát
+-   Phát biểu bài toán
+    -   Mô tả bài toán
+        -   
+    -   Mô tả môi trường triển khai
+    -   Mô tả các chức năng cần triển khai
 -   Môi trường triển khai:
-    -   PC1: 
-        -   Thông tin về PC1:
-            -   CPU: Intel Core i5-8250U
-            -   RAM: 8GB
-            -   Ổ cứng: 256GB SSD
-            -   Hệ điều hành: Windows 10
-            -   Địa chỉ IP: 
+    -   zabbixsrv:
+        -   note: máy chủ giám sát thiết bị mạng, cài đặt zabbix server, 
+        -   OS: Ubuntu 20.04
+        -   IP:
+    -   Pc1:
+        -   note: máy tính cá nhân, cài đặt zabbix agent, web interface
+        -   OS: Windows 11
+        -   IP:
     -   Router1:
-        -   Thông tin về Router1:
-            -   CPU: Intel Core i5-8250U
-    -   Ubuntu Server:
-        -   Thông tin về Ubuntu Server:
-            -   CPU: Intel Core i5-8250U
-            -   RAM: 8GB
-            -   Ổ cứng: 256GB SSD
-            -   Hệ điều hành: Ubuntu 22.04
-    -   Zabbix Server: 
+        -   note: thiết bị mạng, cài đặt zabbix agent
+        -   OS: Cisco IOS
+        -   IP:
 -   Triển khai cấu hình hệ thống giám sát:
     -   Cấu hình Zabbix Server trên Server Ubuntu
     -   Cấu hình SNMP Agent trên PC1
@@ -103,13 +154,15 @@
     -   Cấu hình Web Interface để giám sát Router1
         -   Tạo host Router1
         -   Tạo các item để giám sát Router1
-    -   Cấu hình Web Interface để giám sát PC1
+    -   Cấu hình Web Interface thiết lập các thông số để giám sát PC1
         -   Tạo host PC1
         -   Tạo các item để giám sát PC1
--   Triển khai giám sát thông qua Web Interface
-    -   Giám sát PC1 thông qua Web Interface
-        
-    -   Giám sát Router1 thông qua Web Interface
+    -   Cấu hình Web Interface để giám sát Zabbix Server
+        -   Tạo host Zabbix Server
+        -   Tạo các item để giám sát Zabbix Server
+-   Triển khai kiểm thử hệ thống giám sát
+    -   Kiểm thử giám sát Router1
+    -   Kiểm thử giám sát PC1
 # Chương 4: Kết luận
 -   Tổng kết
 -   Hạn chế
@@ -118,3 +171,11 @@
 
 
 
+
+Cơ chế hoạt động của hệ thống có thể mô tả như sau: 
+-	Thu thập dữ liệu: SNMP Agent sẽ thu thập dữ liệu từ host cần giám sát theo các thiết lập cấu hình. Dữ liệu này bao gồm thông tin về tình trạng hoạt động, tài nguyên sử dụng, băng thông và các chỉ số khác liên quan đến mạng. 
+-	Truyền thông tin: Dữ liệu thu thập từ SNMP Agent sẽ được gửi đến máy chủ Zabbix thông qua giao thức truyền thông như TCP/IP hoặc HTTP. 
+-	Xử lý dữ liệu: Máy chủ nhận dữ liệu từ SNMP Agent và tiến hành xử lý. Quá trình này bao gồm lưu trữ dữ liệu vào cơ sở dữ liệu, so sánh dữ liệu với các ngưỡng cảnh báo được định trước, và tạo ra cảnh báo nếu cần. Máy chủ Zabbix cũng thực hiện các phân tích dữ liệu để tạo ra báo cáo và biểu đồ cho người dùng.
+-	Lưu trữ dữ liệu: Dữ liệu giám sát được máy chủ Zabbix lưu trữ trong cơ sở dữ liệu. Cơ sở dữ liệu chứa thông tin về host, item, trigger, cảnh báo, lịch sử giám sát và các dữ liệu khác.
+-	Hiển thị dữ liệu: Dữ liệu được lưu trữ trong cơ sở dữ liệu sẽ được hiển thị dưới dạng báo cáo và biểu đồ trên giao diện web. Người dùng có thể xem các báo cáo và biểu đồ này để phân tích và đưa ra các quyết định về việc quản lý hệ thống.
+-   Cảnh báo: Nếu dữ liệu thu thập được từ host vượt quá ngưỡng cảnh báo, máy chủ sẽ tạo ra cảnh báo và gửi đến người dùng. Người dùng có thể xem các cảnh báo đã được tạo ra trên giao diện web.

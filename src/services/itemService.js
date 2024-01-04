@@ -291,7 +291,22 @@ const itemService = {
             "id": 1
         })
     },
-    getTrends: async (item, time_from, time_till) => {
+    getTrends: async (item, time_from, time_till, limit) => {
+        if(limit !== undefined) {
+            return httpRequests.post('', {
+                "jsonrpc": "2.0",
+                "method": "trend.get",
+                "params": {
+                    "output": "extend",
+                    "itemids": `${item.itemid}`,
+                    "sortfield": "clock",
+                    "sortorder": "DESC",
+                    "limit": limit,
+                },
+                "auth": `${localStorage.getItem("token")}`,
+                "id": 1
+            })
+        }
         return httpRequests.post('', {
             "jsonrpc": "2.0",
             "method": "trend.get",
@@ -302,7 +317,6 @@ const itemService = {
                 "sortorder": "ASC",
                 "time_from": time_from,
                 "time_till": time_till,
-                "limit": 1
             },
             "auth": `${localStorage.getItem("token")}`,
             "id": 1

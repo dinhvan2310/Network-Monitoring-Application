@@ -15,6 +15,7 @@ const Login = () => {
       JSAlert.alert(result.error.data, result.error.message);
       return;
     }
+    console.log(result)
     localStorage.setItem("token", result.result.sessionid);
     const ud = await userService.userUpdateAutoLogin(result.result.userid, values.remember === true ? 1 : 0)
     console.log(ud)

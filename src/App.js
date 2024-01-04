@@ -11,11 +11,11 @@ import ItemGraph from 'pages/monitoring/graph';
 import LatestData from 'pages/monitoring/latestData';
 import MonitoringHosts from 'pages/monitoring/monitoringHosts';
 import Settings from 'pages/settings';
-import Test from 'pages/test';
 import Users from 'pages/users';
 
 import React from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import hostService from 'services/hostService';
 import itemService from 'services/itemService';
 import problemService from 'services/problemService';
 import triggerService from 'services/triggerService';
@@ -25,16 +25,17 @@ import RequireAuth from 'utils/RequireAuth';
 const App = () => {
 
   const func = async () => {
-    const res = await userService.test()
+    const res = await hostService.getMacro(10249)
     console.log(res)
   }
 
-  // func()
+  func()
 
 
   return (
     <BrowserRouter>
       <Routes>
+        
         <Route path="/" element={<RequireAuth><DefaultLayout/></RequireAuth>}>
           <Route path='/' element={<RequireAuth><Home/></RequireAuth>} />
           <Route path="/users" element={<RequireAuth isAdmin={true}><Users/></RequireAuth>} />
@@ -48,12 +49,13 @@ const App = () => {
           <Route path='/dataCollection/templates' element={<RequireAuth><Templates/></RequireAuth>} />
           <Route path='/dataCollection/templateGroups' element={<RequireAuth><TemplateGroups/></RequireAuth>} />
         </Route>
-        <Route path="/settings" element={<Settings/>} />
-        <Route path="/test" element={<Test/>} />
         <Route path="/login" element={<Login/>} />
+        <Route path="/settings" element={<Settings/>} />
+        
       </Routes>
     </BrowserRouter>
   );
 }
 
 export default App
+

@@ -1,4 +1,4 @@
-import { Button, Form, Input, Modal, Popconfirm, Space, Table, Tag, Tooltip, message } from "antd";
+import { Button, Form, Input, Modal, Popconfirm, Space, Table, Tag, Tooltip, message, Drawer } from "antd";
 import Highlighter from 'react-highlight-words';
 import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
 import JSAlert from "js-alert";
@@ -253,13 +253,14 @@ function TemplateGroups() {
           </Form.Item>
         </Form>
       </Modal>
-      <Modal
+      <Drawer
         destroyOnClose={true}
         title="Edit Template Group"
+        width={536}
         open={isModalEditOpen}
         onOk={() => {}}
         footer={null}
-        onCancel={() => {
+        onClose={() => {
           setIsModalEditOpen(false);
         }}
       >
@@ -323,7 +324,7 @@ function TemplateGroups() {
             </Space>
           </Form.Item>
         </Form>
-      </Modal>
+      </Drawer>
       <Table
         title={() => <h2>Template Groups</h2>}
         rowSelection={rowSelection}
@@ -364,32 +365,20 @@ function TemplateGroups() {
             Delete
           </Button>
         </Popconfirm>
-        <Popconfirm
-          title="Edit the selected template groups?"
-          // description="This action cannot be undone."
-          onConfirm={() => {
-            if(selectedRowKeys.length > 1) {
-              JSAlert.alert("Please select only one template group to edit.");
-              return;
-            }
-            setIsModalEditOpen(true);
-            // setSelectedRowKeys([]);
-          }}
-          onCancel={(e) => {
-            message.error("Canceled editting template groups.");
-          }}
-          okText="Yes"
-          cancelText="No"
-        >
+        
           <Button
-            type="primary"
-            ghost
-            // danger
+            onClick={() => {
+              if(selectedRowKeys.length > 1) {
+                JSAlert.alert("Please select only one template group to edit.");
+                return;
+              }
+              setIsModalEditOpen(true);
+              // setSelectedRowKeys([]);
+            }}
             disabled={selectedRowKeys.length > 0 ? false : true}
           >
             Edit
           </Button>
-        </Popconfirm>
       </Space>
 
     </>

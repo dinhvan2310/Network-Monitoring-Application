@@ -9,7 +9,9 @@ import {
   Tooltip,
   Select,
   Popconfirm,
-  ConfigProvider
+  List,
+  Collapse,
+  Drawer 
 } from "antd";
 import {
   PlusOutlined,
@@ -27,6 +29,7 @@ import { render } from "@testing-library/react";
 
 import styles from "./trigger.module.css";
 import { key } from "localforage";
+import templateService from "services/templateService";
 
 const PRIORITIES = {
     0: "Not classified",
@@ -53,24 +56,29 @@ const VALUES_COLOR = {
     1: "#e74c3c"
 }
 
-// const expressionConverter = async (trigger) => {
-//   console.log(trigger);
-//   const expression = trigger.expression;
+const expressionConverter = async (trigger, hostid, templateid) => {
+  let expression = trigger.expression;
+  let hostName = "";
 
-//   const regex = /\{(\d+)\}/g;
-//   const matches = [...expression.matchAll(regex)];
-//   console.log(matches);
+  if(hostid !== null) {
+    hostName = (await hostService.getHost(hostid)).result[0].host;
+  }
+  else{
+    hostName = (await templateService.getTemplateById(templateid)).result[0].host;
+    console.log(hostName)
+  }
 
-//   const rs = matches.map(async(match, idx) => {
-//     const func = trigger.functions[idx]
-//     console.log(idx)
-//     if(func === undefined) continue;
-//     console.log(func)
-//     // const itemName = (await itemService.getItem(func.itemid)).result[0].name;
-//     // console.log(itemName);
-//   });
-//   console.log(await Promise.all(rs));
-// }
+  const param = trigger.functions.map(async (func, index) => {
+    console.log(func)
+    const item = await itemService.getItem(func.itemid);
+    let parameter = func.parameter.split(",")[1];
+    parameter = parameter ? "," + parameter : "";
+    expression = expression.replace(`{${func.functionid}}`, `${func.function}(/${hostName}/${item.result[0].key_}${parameter})`)
+  })
+  await Promise.all(param)
+
+  return expression
+}
 
 
 
@@ -94,6 +102,12 @@ function Trigger() {
   const [reload, setReload] = useState(false);
   const [isModalAddShow, setIsModalAddShow] = useState(false);
   const [isModalUpdateShow, setIsModalUpdateShow] = useState(false);
+  const [isModalItemShow, setIsModalItemShow] = useState(false);
+  const [items, setItems] = useState([]);
+
+  const [hostName, setHostName] = useState("");
+  const [templateName, setTemplateName] = useState("");
+
   const [selectedItem, setSelectedItem] = useState(() => {
     return {
       expression: '',
@@ -105,15 +119,30 @@ function Trigger() {
   useEffect(() => {
     const fetchData = async () => {
         setLoading(true);
-        const trigger = await triggerService.getTriggerByHost(hostid);
+        let trigger = null
+        if(hostid) {
+          trigger = await triggerService.getTriggerByHost(hostid);
+          const items = await itemService.getItemsByHost(hostid);
+          setHostName((await hostService.getHost(hostid)).result[0].host)
+          setItems(items.result) 
+          console.log(items)
+        } 
+        else {
+          trigger = await triggerService.getTriggerByTemplate(templateid);
+          const items = await itemService.getItemByTemplate(templateid);
+          setTemplateName((await templateService.getTemplateById(templateid)).result[0].host)
+          setItems(items.result) 
+        }
         console.log(trigger);
-
-        setDataSource(trigger.result.map(item => {
-            return {
-                ...item,
-                key: item.triggerid
-            }
-        }));
+        const rs = trigger.result.map(async (item) => {
+          const expression = await expressionConverter(item, hostid, templateid);
+          return {
+              ...item,
+              key: item.triggerid,
+              expression: expression
+          }
+      })
+        setDataSource(await Promise.all(rs));
         setLoading(false);
     }
     fetchData();
@@ -322,7 +351,7 @@ function Trigger() {
       },
       {
         title: () => (
-          <Tooltip title="Add Item">
+          <Tooltip title="Add Trigger">
             <Button
               icon={<PlusOutlined />}
               onClick={async () => {
@@ -360,18 +389,19 @@ function Trigger() {
         loading={loading}
       />
       
-      <Modal
+      <Drawer
         destroyOnClose={true}
-        title="Add Item"
+        title="Add Trigger"
         open={isModalAddShow}
-        onCancel={() => setIsModalAddShow(false)}
+        width={536}
+        onClose={() => setIsModalAddShow(false)}
         footer={null}
       >
         <Form
           name="addItem"
-          labelCol={{ span: 8 }}
+          labelAlign="left"
+          labelCol={{ span: 6 }}
           wrapperCol={{ span: 16 }}
-          style={{ maxWidth: 800 }}
           initialValues={{}}
           onFinish={async (values) => {
             console.log(values);
@@ -408,8 +438,35 @@ function Trigger() {
               },
             ]}
           >
-            <Input />
+            <Input.TextArea/>
           </Form.Item>
+          <Drawer 
+        destroyOnClose={true}
+        title={`${items.length} Items of ${hostName?hostName:templateName}`}
+        open={isModalItemShow}
+        size="default"
+        onClose={() => setIsModalItemShow(false)}
+        footer={null}
+        >
+          <List
+            size="large"
+            bordered
+            dataSource={items}
+            renderItem={item => 
+              <List.Item 
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                }}
+              >
+                <h4>{item.name}</h4>
+                <p>{`/${hostName?hostName:templateName}/${item.key_}`}</p>
+              </List.Item>
+            }
+          />
+
+          </Drawer>
           <Form.Item
             label="Severity"
             name={"priority"}
@@ -429,24 +486,34 @@ function Trigger() {
                 <Select.Option value="5">Disaster</Select.Option>
             </Select>
           </Form.Item>
-          <Button type="primary" htmlType="submit">
-            Submit
-          </Button>
+          <Space>
+            <Button type="primary" htmlType="submit">
+              Submit
+            </Button>
+            <Button 
+                color="#1890ff"
+                onClick={() => setIsModalItemShow(true)}
+              >
+                Show Items
+              </Button>
+          </Space>
         </Form>
-      </Modal>
+      </Drawer>
 
-      <Modal
+      <Drawer 
         destroyOnClose={true}
         title="Update Trigger"
         open={isModalUpdateShow}
-        onCancel={() => setIsModalUpdateShow(false)}
+        width={536}
+        onClose={() => setIsModalUpdateShow(false)}
         footer={null}
       >
         <Form
           name="addItem"
-          labelCol={{ span: 8 }}
+          labelAlign="left"
+          labelCol={{ span: 6 }}
           wrapperCol={{ span: 16 }}
-          style={{ maxWidth: 800 }}
+          style={{ width: "100%" }}
           initialValues={{}}
           onFinish={async (values) => {
             console.log(values);
@@ -485,8 +552,36 @@ function Trigger() {
             ]}
             initialValue={selectedItem.expression}
           >
-            <Input />
+            <Input.TextArea/>
           </Form.Item>
+          
+          <Drawer 
+        destroyOnClose={true}
+        title={`${items.length} Items of ${hostName?hostName:templateName}`}
+        open={isModalItemShow}
+        size="default"
+        onClose={() => setIsModalItemShow(false)}
+        footer={null}
+        >
+          <List
+            size="large"
+            bordered
+            dataSource={items}
+            renderItem={item => 
+              <List.Item 
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                }}
+              >
+                <h4>{item.name}</h4>
+                <p>{`/${hostName?hostName:templateName}/${item.key_}`}</p>
+              </List.Item>
+            }
+          />
+
+          </Drawer>
           <Form.Item
             label="Severity"
             name={"priority"}
@@ -507,12 +602,21 @@ function Trigger() {
                 <Select.Option value="5">Disaster</Select.Option>
             </Select>
           </Form.Item>
-          <Button type="primary" htmlType="submit">
-            Submit
-          </Button>
+          <Space>
+            <Button type="primary" htmlType="submit">
+              Submit
+            </Button>
+            <Button 
+                color="#1890ff"
+                onClick={() => setIsModalItemShow(true)}
+              >
+                Show Items
+              </Button>
+          </Space>
         </Form>
-      </Modal>
+      </Drawer >
 
+      
       <Space>
         <Button
           danger
@@ -589,7 +693,6 @@ function Trigger() {
         >
           <Button
           type="primary"
-          ghost
           danger
           disabled={selectedRowKeys.length > 0 ? false : true}
           
@@ -600,8 +703,6 @@ function Trigger() {
         </Popconfirm>
         
           <Button
-          type="primary"
-          ghost
           disabled={selectedRowKeys.length > 0 ? false : true}
           onClick={async () => {
             if (selectedRowKeys.length > 1) {
@@ -614,6 +715,8 @@ function Trigger() {
             }
             const trigger = await triggerService.getTrigger(selectedRowKeys[0]);
             console.log(trigger);
+            const expression = await expressionConverter(trigger.result[0], hostid, templateid);
+            trigger.result[0].expression = expression
             setSelectedItem(trigger.result[0]);
             setIsModalUpdateShow(true);
           }}

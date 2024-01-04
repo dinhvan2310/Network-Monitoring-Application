@@ -197,20 +197,10 @@ function Templates() {
         return (
           <Space>
             <Tag color="#2ecc71">{trigger.result.length}</Tag>
-            <Link to={`/dataCollection/trigger?hostid=${key}`}>{"Trigger"}</Link>
+            <Link to={`/dataCollection/trigger?templateid=${key}`}>{"Trigger"}</Link>
           </Space>
         );
       },
-    },
-    {
-      title: "Vendor",
-      dataIndex: "vendor",
-      key: "vendor",
-    },
-    {
-      title: "Version",
-      dataIndex: "version",
-      key: "version",
     },
     {
       title: () => (
@@ -303,6 +293,7 @@ function Templates() {
                 JSAlert.Icons.Success
               );
               setReload(!reload);
+              setSelectedRowKeys([]);
               setOpen(false);
             }
           }}

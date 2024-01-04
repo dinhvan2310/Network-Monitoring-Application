@@ -1,4 +1,4 @@
-import { Button, Form, Input, Modal, Space, Table, Tag, Tooltip, Select, Popconfirm} from "antd";
+import { Button, Form, Input, Modal, Space, Table, Tag, Tooltip, Select, Popconfirm, Drawer} from "antd";
 import { PlusOutlined, SearchOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import JSAlert from "js-alert";
 import Highlighter from 'react-highlight-words';
@@ -530,12 +530,12 @@ function Items() {
           autoComplete="off"
         >
             <Form.Item
-            label="Host name"
+            label="Item name"
             name={"host"}
             rules={[
               {
                 required: true,
-                message: "Please input host name",
+                message: "Please input item name",
               },
             ]}
           >
@@ -641,7 +641,7 @@ function Items() {
                 message: "Please input history storage period",
               },
               {
-                pattern: /^(\d+)(d)$/,
+                pattern: /^(\d+)(d|w)$/,
                 message: "Please input history storage period in format 90d",
               }
             ]}
@@ -658,7 +658,7 @@ function Items() {
                 message: "Please input trend storage period",
               },
               {
-                pattern: /^(\d+)(d)$/,
+                pattern: /^(\d+)(d|w)$/,
                 message: "Please input trend storage period in format 365d",
               }
             ]}
@@ -677,7 +677,7 @@ function Items() {
           </Button>
         </Form>
       </Modal>
-        <Modal
+        <Drawer
         destroyOnClose={true}
         title="Update Item"
         open={isModalUpdateShow}
@@ -728,7 +728,7 @@ function Items() {
             rules={[
               {
                 required: true,
-                message: "Please input host name",
+                message: "Please input item name",
               },
             ]}
             initialValue={ selectedItem ? selectedItem.name : "" }
@@ -839,8 +839,8 @@ function Items() {
                 message: "Please input history storage period",
               },
               {
-                pattern: /^(\d+)(d)$/,
-                message: "Please input history storage period in format 90d",
+                pattern: /^(\d+)(d|w)$/,
+                message: "Please input history storage period in format 90d, 2w",
               }
             ]}
             initialValue={selectedItem ? (selectedItem.history === '0' ? '0d' : selectedItem.history) : ""}
@@ -856,7 +856,7 @@ function Items() {
                 message: "Please input trend storage period",
               },
               {
-                pattern: /^(\d+)(d)$/,
+                pattern: /^(\d+)(d|w)$/,
                 message: "Please input trend storage period in format 365d",
               }
             ]}
@@ -875,8 +875,9 @@ function Items() {
             Submit
           </Button>
         </Form>
-      </Modal>
+      </Drawer>
       <Table
+        bordered
         title={() => "Items"}
         rowSelection={rowSelection}
         columns={columns}

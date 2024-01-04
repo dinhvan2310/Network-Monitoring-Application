@@ -73,6 +73,7 @@ const userService = {
       method: "user.update",
       params: {
         userid: `${user.userid}`,
+        username: `${user.username}`,
         name: `${user.name}`,
         surname: `${user.surname}`,
         usrgrps: [
