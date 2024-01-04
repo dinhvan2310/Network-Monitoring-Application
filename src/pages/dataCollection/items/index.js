@@ -530,12 +530,12 @@ function Items() {
           autoComplete="off"
         >
             <Form.Item
-            label="Host name"
+            label="Item name"
             name={"host"}
             rules={[
               {
                 required: true,
-                message: "Please input host name",
+                message: "Please input item name",
               },
             ]}
           >
@@ -728,7 +728,7 @@ function Items() {
             rules={[
               {
                 required: true,
-                message: "Please input host name",
+                message: "Please input item name",
               },
             ]}
             initialValue={ selectedItem ? selectedItem.name : "" }

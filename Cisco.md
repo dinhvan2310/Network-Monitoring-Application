@@ -66,7 +66,6 @@
             a.  AuthPriv: có xác thực và mã hóa dữ liệu
             b.  AuthNoPriv: có xác thực nhưng không mã hóa dữ liệu
             c.  NoAuthNoPriv: không có xác thực và mã hóa dữ liệu
-    6.  Context name: Context name của SNMP
     6.  Security name: Security name của SNMP
     6.  Security level: Security level của SNMP
     6,  Auth protocol: Auth protocol của SNMP
