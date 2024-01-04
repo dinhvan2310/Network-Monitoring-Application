@@ -9,7 +9,8 @@ import {
   Tag,
   Tooltip,
   TreeSelect,
-  Drawer
+  Drawer,
+  List
 } from "antd";
 import {
   PlusOutlined,
@@ -161,6 +162,8 @@ function Hosts() {
         text
       ),
   });
+
+  const [isModalAddMacroShown, setIsModalAddMacroShown] = useState(false);
 
   const columns = [
     {
@@ -321,6 +324,7 @@ function Hosts() {
   }, [version]);
 
   const [dataSource, setDataSource] = useState([]);
+  const [macros, setMacros] = useState([]);
   const [selectedHost, setSelectedHost] = useState(null);
   useEffect(() => {
     const fetchDevices = async () => {
@@ -365,6 +369,7 @@ function Hosts() {
 
   const [loading, setLoading] = useState(false);
   const [isModalShown, setIsModalShown] = useState(false);
+  const [isDrawerMacroShown, setIsDrawerMacroShown] = useState(false);
   const [isModalAddHostShown, setIsModalAddHostShown] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
@@ -385,11 +390,11 @@ function Hosts() {
   const [treeData, setTreeData] = useState([]);
   return (
     <>
-      <Drawer
+      <Modal
         title="Add host"
         width={536}
         open={isModalAddHostShown}
-        onClose={() => {
+        onCancel={() => {
           setVersion(2);
           setSMNPv3Version(0);
           setIsModalAddHostShown(false)
@@ -436,7 +441,7 @@ function Hosts() {
               host.interfaces[0].details = {
                 version: `${values.version}`,
                 bulk: 1,
-                contextname: `${values.contextname}`,
+                // contextname: `${values.contextname}`,
                 securitylevel: `${values.securitylevel}`,
                 securityname: `${values.securityname}`,
               };
@@ -645,13 +650,13 @@ function Hosts() {
                 />
               </Form.Item>
               <>
-                  <Form.Item
+                  {/* <Form.Item
                     label="Context name"
                     name={"contextname"}
                     initialValue={""}
                   >
                     <Input />
-                  </Form.Item>
+                  </Form.Item> */}
                   <Form.Item
                     label="Security name"
                     name={"securityname"}
@@ -769,7 +774,7 @@ function Hosts() {
             Submit
           </Button>
         </Form>
-      </Drawer>
+      </Modal>
       <Drawer
         open={isModalShown}
         onClose={() => {
@@ -834,7 +839,7 @@ function Hosts() {
               ip: `${values.ip}`,
               bulk: 1,
               community: `${values.community?values.community:""}`,
-              contextname: `${values.contextname?values.contextname:""}`,
+              // contextname: `${values.contextname?values.contextname:""}`,
               securitylevel: `${values.securitylevel}`,
               securityname: `${values.securityname?values.securityname:""}`,
               authprotocol: `${values.authprotocol}`,
@@ -848,6 +853,7 @@ function Hosts() {
               JSAlert.alert("2: " + response2.error.data, response2.error.message);
             } else {
               JSAlert.alert("Update host successfully");
+              setSelectedRowKeys([]);
               setReLoad((pre) => !pre);
               setIsModalShown(false);
             }
@@ -1029,13 +1035,13 @@ function Hosts() {
                 />
               </Form.Item>
               <>
-                  <Form.Item
+                  {/* <Form.Item
                     label="Context name"
                     name={"contextname"}
                     initialValue={selectedHost? selectedHost.interfaces.result[0].details.contextname : ""}
                   >
                     <Input />
-                  </Form.Item>
+                  </Form.Item> */}
                   <Form.Item
                     label="Security name"
                     name={"securityname"}
@@ -1049,7 +1055,7 @@ function Hosts() {
                   <Form.Item
                 label="Auth protocol"
                 name={"authprotocol"}
-                initialValue={AUTH_PROTOCOL[selectedHost.interfaces.result[0].details.authprotocol]}
+                initialValue={selectedHost?AUTH_PROTOCOL[selectedHost.interfaces.result[0].details.authprotocol]:0}
               >
                 <Select
                   style={{
@@ -1089,7 +1095,7 @@ function Hosts() {
               <Form.Item
                 label="Auth pass"
                 name={"authpassphrase"}
-                initialValue={selectedHost.interfaces.result[0].details.authpassphrase}
+                initialValue={selectedHost?selectedHost.interfaces.result[0].details.authpassphrase:""}
               >
                 <Input />
               </Form.Item>
@@ -1100,7 +1106,7 @@ function Hosts() {
                   <Form.Item
                 label="Priv protocol"
                 name={"privprotocol"}
-                initialValue={PRIV_PROTOCOL[selectedHost.interfaces.result[0].details.privprotocol]}
+                initialValue={selectedHost?PRIV_PROTOCOL[selectedHost.interfaces.result[0].details.privprotocol]:0}
               >
                 <Select
                   style={{
@@ -1140,7 +1146,7 @@ function Hosts() {
               <Form.Item
                 label="Priv pass"
                 name={"privpassphrase"}
-                initialValue={selectedHost.interfaces.result[0].details.privpassphrase}
+                initialValue={selectedHost?selectedHost.interfaces.result[0].details.privpassphrase:""}
               >
                 <Input />
               </Form.Item>
@@ -1156,10 +1162,131 @@ function Hosts() {
 
 
 
-          <Button type="primary" htmlType="submit">
-            Submit
-          </Button>
+          <Space>
+            <Button type="primary" htmlType="submit">
+              Submit
+            </Button>
+            <Button onClick={async () => {
+              setIsDrawerMacroShown(true)
+              const macros = await hostService.getMacro(selectedHost.result[0].hostid)
+              const rs = selectedHost.templates.result.map(async (template) => {
+                const macros = await hostService.getMacro(template.templateid)
+                return macros.result
+              })
+              const macros2 = await Promise.all(rs)
+              console.log([...macros.result, ...macros2].flat())
+              setMacros([...macros.result, ...macros2].flat())
+            }}>
+              Macro
+            </Button>
+          </Space>
+
         </Form>
+        <Modal
+          title="Add macro"
+          width={536}
+          open={isModalAddMacroShown}
+          onCancel={() => {
+            setIsModalAddMacroShown(false)
+          }}
+          destroyOnClose={true}
+          footer={null}
+          // onOk={async () => {
+            >
+          <Form
+            name="addmacro"
+            labelCol={{ span: 6 }}
+            wrapperCol={{ span: 16 }}
+            initialValues={{}}
+            onFinish={async (values) => {
+              console.log(values)
+              const res = await hostService.addMacro(selectedHost.result[0].hostid, values)
+              console.log(res)
+              if(res.error){
+                JSAlert.alert(res.error.data, res.error.message)
+              }
+              else{
+                JSAlert.alert("Add macro successfully")
+                setMacros([...macros, {hostmacroid: res.result.hostmacroid, macro: values.macro, value: values.value}])
+                setIsModalAddMacroShown(false)
+              }
+            }}
+            autoComplete="off"
+          >
+            <Form.Item
+              label="Macro"
+              name={"macro"}
+              rules={[
+                {
+                  required: true,
+                  message: "Please input macro",
+                },
+              ]}
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+
+              label="Value"
+              name={"value"}
+              rules={[
+                {
+                  required: true,
+                  message: "Please input value",
+                },
+              ]}
+            >
+              <Input />
+            </Form.Item>
+            <Button type="primary" htmlType="submit">
+              Submit
+            </Button>
+          </Form>
+            </Modal>
+
+        <Drawer 
+          open={isDrawerMacroShown}
+          onClose={() => {
+            setIsDrawerMacroShown(false)
+          }}
+          width={536}
+          title= {`${macros.length} macros`}
+          footer={null}
+          destroyOnClose={true}
+          >
+            <Button onClick={async() => {
+              setIsModalAddMacroShown(true)
+            }}>
+              Create
+            </Button>
+            <List
+              size="small"
+              bordered
+              dataSource={macros}
+              renderItem={item => (
+                <>
+                  <List.Item>
+                    <List.Item.Meta
+                      title={item.macro}
+                      description={item.value}
+                    />
+                    <Button onClick={async () => {
+                      const res = hostService.deleteMacro(item.hostmacroid)
+                      if(res.error){
+                        JSAlert.alert(res.error.data, res.error.message)
+                      }
+                      else{
+                        JSAlert.alert("Delete macro successfully")
+                        setMacros(macros.filter(macro => macro.hostmacroid !== item.hostmacroid))
+                      }
+                    }}>
+                      Delete
+                    </Button>
+                  </List.Item>
+                </>
+              )}
+            />
+          </Drawer>
       </Drawer>
       <Table
         title={() => "Hosts"}
@@ -1170,7 +1297,6 @@ function Hosts() {
       />
       <Space>
         <Button
-          danger
           disabled={selectedRowKeys.length > 0 ? false : true}
           onClick={() => {
             selectedRowKeys.forEach(async (key) => {
@@ -1194,8 +1320,6 @@ function Hosts() {
           Disabled
         </Button>
         <Button
-          type="primary"
-          ghost
           disabled={selectedRowKeys.length > 0 ? false : true}
           onClick={() => {
             selectedRowKeys.forEach(async (key) => {
@@ -1219,7 +1343,6 @@ function Hosts() {
           Enabled
         </Button>
         <Button
-          type="primary"
           danger
           disabled={selectedRowKeys.length > 0 ? false : true}
           onClick={() => {
@@ -1255,6 +1378,7 @@ function Hosts() {
               selectedRowKeys[0]
             );
             hostSelected.interfaces = await hostService.getHostInterfaces(selectedRowKeys[0])
+            hostSelected.item = await itemService.getItemsByHost(selectedRowKeys[0])
             console.log(hostSelected);
             setSelectedHost(hostSelected);
             setValue(

@@ -131,6 +131,9 @@ function Problem({item}) {
     return ( 
         <>
             <Timeline
+                style={{
+                    marginTop: "12px",
+                }}
                 mode="left"
                 items={data}
             />

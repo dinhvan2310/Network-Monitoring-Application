@@ -351,7 +351,7 @@ function Trigger() {
       },
       {
         title: () => (
-          <Tooltip title="Add Item">
+          <Tooltip title="Add Trigger">
             <Button
               icon={<PlusOutlined />}
               onClick={async () => {
@@ -391,7 +391,7 @@ function Trigger() {
       
       <Drawer
         destroyOnClose={true}
-        title="Add Item"
+        title="Add Trigger"
         open={isModalAddShow}
         width={536}
         onClose={() => setIsModalAddShow(false)}

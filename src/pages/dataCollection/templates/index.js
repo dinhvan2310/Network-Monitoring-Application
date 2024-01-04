@@ -203,16 +203,6 @@ function Templates() {
       },
     },
     {
-      title: "Vendor",
-      dataIndex: "vendor",
-      key: "vendor",
-    },
-    {
-      title: "Version",
-      dataIndex: "version",
-      key: "version",
-    },
-    {
       title: () => (
         <Tooltip title="Add Item">
           <Button
@@ -303,6 +293,7 @@ function Templates() {
                 JSAlert.Icons.Success
               );
               setReload(!reload);
+              setSelectedRowKeys([]);
               setOpen(false);
             }
           }}

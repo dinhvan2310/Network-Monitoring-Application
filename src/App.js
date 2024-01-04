@@ -11,11 +11,11 @@ import ItemGraph from 'pages/monitoring/graph';
 import LatestData from 'pages/monitoring/latestData';
 import MonitoringHosts from 'pages/monitoring/monitoringHosts';
 import Settings from 'pages/settings';
-import Test from 'pages/test';
 import Users from 'pages/users';
 
 import React from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import hostService from 'services/hostService';
 import itemService from 'services/itemService';
 import problemService from 'services/problemService';
 import triggerService from 'services/triggerService';
@@ -25,11 +25,11 @@ import RequireAuth from 'utils/RequireAuth';
 const App = () => {
 
   const func = async () => {
-    const res = await userService.test()
+    const res = await hostService.getMacro(10249)
     console.log(res)
   }
 
-  // func()
+  func()
 
 
   return (
@@ -51,7 +51,6 @@ const App = () => {
         </Route>
         <Route path="/login" element={<Login/>} />
         <Route path="/settings" element={<Settings/>} />
-        <Route path="/test" element={<Test/>} />
         
       </Routes>
     </BrowserRouter>

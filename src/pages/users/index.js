@@ -115,8 +115,11 @@ function Users() {
       <>
         <Drawer
           title="Edit User"
-          width={720}
-          onClose={onClose}
+          width={536}
+          onClose={() => {
+            setIsChangePassword(false);
+            setOpen(false);
+          }}
           open={open}
           styles={{
             body: {
@@ -142,6 +145,7 @@ function Users() {
             onFinish={async (values) => {
               values.userid = selectedRowKeys[0]
               console.log(values);
+              
               const response = await userService.updateUser(values)
 
               if(values.changepassword){
@@ -158,6 +162,8 @@ function Users() {
                 JSAlert.alert(response.error.data, response.error.message);
                 return;
               }else{
+                setSelectedRowKeys([])
+                JSAlert.alert("User updated successfully");
                 setReload(!reload)
               }
               setOpen(false);
@@ -197,7 +203,7 @@ function Users() {
             >
               <Radio.Group>
                 <Radio.Button value="3">Super Admin</Radio.Button>
-                <Radio.Button value="2">Admin</Radio.Button>
+                <Radio.Button value="2">User</Radio.Button>
               </Radio.Group>
             </Form.Item>
             <Form.Item
@@ -336,6 +342,7 @@ function Users() {
       </>
       <Modal
         title="Add User"
+        width={536}
         open={isModalOpen}
         onOk={() => {}}
         footer={null}
@@ -360,6 +367,8 @@ function Users() {
           }}
           onFinish={async (values) => {
             console.log(values);
+            if(values.name === undefined) values.name = ""
+            if(values.lastname === undefined) values.lastname = ""
             console.log(autologin);
             const response = await userService.addUser(
               values.username,
@@ -408,7 +417,7 @@ function Users() {
           >
             <Radio.Group>
             <Radio.Button value="3">Super Admin</Radio.Button>
-                <Radio.Button value="2">Admin</Radio.Button>
+                <Radio.Button value="2">User</Radio.Button>
             </Radio.Group>
           </Form.Item>
           <Form.Item label="Name" name="name" rules={[{}]}>
@@ -542,8 +551,6 @@ function Users() {
         </Popconfirm>
 
         <Button
-          ghost
-          type="primary"
           disabled={selectedRowKeys.length > 0 ? false : true}
           onClick={() => {
             if (selectedRowKeys.length > 1) {

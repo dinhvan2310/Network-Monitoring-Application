@@ -255,6 +255,7 @@ function HostGroups() {
               return
             } else {
               setIsModalUpdateOpen(false);
+              JSAlert.alert("Host group updated successfully.");
               setDataSource(dataSource.map((hostGroup) => {
                 if(hostGroup.key === selectedHostGroup.id) {
                   return {
@@ -315,6 +316,7 @@ function HostGroups() {
               return
             } else {
               setIsModalOpen(false);
+              JSAlert.alert("Host group created successfully.");
               setDataSource([...dataSource, {key: response.result.groupids[0], name: values.groupName, hosts: []}])
             }
           }}

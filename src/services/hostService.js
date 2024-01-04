@@ -279,6 +279,43 @@ const hostService = {
             "id": 1
         })
     },
+    getMacro: async (hostid) => {
+        return httpRequests.post('', {
+            "jsonrpc": "2.0",
+            "method": "usermacro.get",
+            "params": {
+                "output": "extend",
+                "hostids": `${hostid}`
+            },
+            "auth": `${localStorage.getItem("token")}`,
+            "id": 1
+        })
+    },
+    deleteMacro: async (macroId) => {
+        return httpRequests.post('', {
+            "jsonrpc": "2.0",
+            "method": "usermacro.delete",
+            "params": [
+                `${macroId}`
+            ],
+            "auth": `${localStorage.getItem("token")}`,
+            "id": 1
+        })
+    },
+    addMacro: async (hostid, macro) => {
+        console.log(macro)
+        return httpRequests.post('', {
+            "jsonrpc": "2.0",
+            "method": "usermacro.create",
+            "params": {
+                "hostid": `${hostid}`,
+                "macro": `${macro.macro}`,
+                "value": `${macro.value}`
+            },
+            "auth": `${localStorage.getItem("token")}`,
+            "id": 1
+        })
+    }
 }
 
 export default hostService

@@ -171,3 +171,11 @@
 
 
 
+
+Cơ chế hoạt động của hệ thống có thể mô tả như sau: 
+-	Thu thập dữ liệu: SNMP Agent sẽ thu thập dữ liệu từ host cần giám sát theo các thiết lập cấu hình. Dữ liệu này bao gồm thông tin về tình trạng hoạt động, tài nguyên sử dụng, băng thông và các chỉ số khác liên quan đến mạng. 
+-	Truyền thông tin: Dữ liệu thu thập từ SNMP Agent sẽ được gửi đến máy chủ Zabbix thông qua giao thức truyền thông như TCP/IP hoặc HTTP. 
+-	Xử lý dữ liệu: Máy chủ nhận dữ liệu từ SNMP Agent và tiến hành xử lý. Quá trình này bao gồm lưu trữ dữ liệu vào cơ sở dữ liệu, so sánh dữ liệu với các ngưỡng cảnh báo được định trước, và tạo ra cảnh báo nếu cần. Máy chủ Zabbix cũng thực hiện các phân tích dữ liệu để tạo ra báo cáo và biểu đồ cho người dùng.
+-	Lưu trữ dữ liệu: Dữ liệu giám sát được máy chủ Zabbix lưu trữ trong cơ sở dữ liệu. Cơ sở dữ liệu chứa thông tin về host, item, trigger, cảnh báo, lịch sử giám sát và các dữ liệu khác.
+-	Hiển thị dữ liệu: Dữ liệu được lưu trữ trong cơ sở dữ liệu sẽ được hiển thị dưới dạng báo cáo và biểu đồ trên giao diện web. Người dùng có thể xem các báo cáo và biểu đồ này để phân tích và đưa ra các quyết định về việc quản lý hệ thống.
+-   Cảnh báo: Nếu dữ liệu thu thập được từ host vượt quá ngưỡng cảnh báo, máy chủ sẽ tạo ra cảnh báo và gửi đến người dùng. Người dùng có thể xem các cảnh báo đã được tạo ra trên giao diện web.
