@@ -1,7 +1,7 @@
 # Zabbix API Network Monitoring Application
 > Detailed documentation: 
--   [Zabbix API Network Monitoring Application (1)]('/Document.pdf)
--   [Zabbix API Network Monitoring Application (2)]('/Cisco.md)
+-   [Zabbix API Network Monitoring Application (1)](https://github.com/dinhvan2310/pbl4_snmp_ui/blob/master/Document.pdf)
+-   [Zabbix API Network Monitoring Application (2)](https://github.com/dinhvan2310/pbl4_snmp_ui/blob/master//Cisco.md)
 
 Zabbix Monitor Application is built using the Zabbix API, which allows it to interact with the Zabbix server to retrieve monitoring data, configure monitoring settings, and receive alerts. The application provides a user-friendly interface to visualize monitoring data, configure monitoring parameters, and manage alerts and notifications. It is designed to be scalable, flexible, and customizable to meet the monitoring needs of various IT environments.
 
