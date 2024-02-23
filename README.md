@@ -1,10 +1,10 @@
 # Zabbix API Network Monitoring Application
+> Detailed documentation: [Zabbix API Network Monitoring Application]('./Document.docx)
 
 Zabbix Monitor Application is built using the Zabbix API, which allows it to interact with the Zabbix server to retrieve monitoring data, configure monitoring settings, and receive alerts. The application provides a user-friendly interface to visualize monitoring data, configure monitoring parameters, and manage alerts and notifications. It is designed to be scalable, flexible, and customizable to meet the monitoring needs of various IT environments.
 
 # Purpose
 The purpose of the Zabbix Monitor Application is to provide a comprehensive monitoring solution for IT infrastructure, enabling organizations to maintain high availability, performance, and security of their network resources and services. It aims to simplify the monitoring process, improve visibility into system performance, and facilitate proactive management of IT resources. By leveraging the Zabbix API, the application can integrate with existing monitoring systems and provide a unified platform for monitoring and managing network devices, servers, and applications.
-
 
 # Features
 
@@ -61,12 +61,11 @@ You can install this application on your server or local machine. To install thi
 
 # Preview:
 
-![alt text](image-1.png)
+![alt text](image-4.png)
 ![alt text](image-2.png)
 ![alt text](image-3.png)
-![alt text](image-4.png)
+![alt text](image-5.png)
 ![alt text](image-6.png)
-![alt text](image-8.png)
 ![alt text](image-7.png)
 
 # Tools used
